@@ -107,6 +107,7 @@ int main(int argc, char * argv[]) {
   const double taueta    = cfg.get<double>("taueta");
   const double decayModeFinding    = cfg.get<double>("decayModeFinding");
   const double   decayModeFindingNewDMs  = cfg.get<double>("decayModeFindingNewDMs");
+  const double   againstElectronVLooseMVA6  = cfg.get<double>("againstElectronVLooseMVA6");
   const double   againstElectronVLooseMVA5  = cfg.get<double>("againstElectronVLooseMVA5");
   const double   againstMuonTight3  = cfg.get<double>("againstMuonTight3");
   const double   vertexz =  cfg.get<double>("vertexz");
@@ -520,7 +521,7 @@ int main(int argc, char * argv[]) {
 	    }
 
 	  }
-
+	if (analysisTree.event_run == 254833) lumi = false;
 	if (!lumi) continue;
 	//if (lumi ) cout<<"  =============  Found good run"<<"  "<<n<<"  "<<lum<<endl;
       }
@@ -600,6 +601,22 @@ int main(int argc, char * argv[]) {
 	//	tau_index=0;
       }
 
+	std::vector<TString> metFlags; metFlags.clear();
+
+     //////////////MET filters flag
+      if (isData){
+
+	 metFlags.push_back("Flag_HBHENoiseFilter");
+	 metFlags.push_back("Flag_HBHENoiseIsoFilter");
+	 metFlags.push_back("Flag_CSCTightHalo2015Filter");
+	 metFlags.push_back("Flag_EcalDeadCellTriggerPrimitiveFilter");
+	 metFlags.push_back("Flag_goodVertices");
+	 metFlags.push_back("Flag_eeBadScFilter");
+
+      }
+
+	bool METflag = metFiltersPasses(analysisTree, metFlags);
+	if (!METflag) continue;
 
       if (!isData) 
 	{
@@ -759,21 +776,29 @@ int main(int argc, char * argv[]) {
 	if (analysisTree.tau_decayModeFinding[it]<decayModeFindingNewDMs) continue;
 	if ( fabs(analysisTree.tau_leadchargedhadrcand_dz[it])> leadchargedhadrcand_dz) continue;
 
-	if (analysisTree.tau_againstElectronVLooseMVA5[it]<againstElectronVLooseMVA5) continue;
+	if (string::npos == filen.find("stau")  && analysisTree.tau_againstElectronVLooseMVA6[it]<againstElectronVLooseMVA6) continue;
+	if (string::npos != filen.find("stau")  && analysisTree.tau_againstElectronVLooseMVA5[it]<againstElectronVLooseMVA5) continue;
 	if (analysisTree.tau_againstMuonTight3[it]<againstMuonTight3) continue;
 
 	//cout<<"  "<<analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[it]<<endl;
 	
 	////if (!InvertTauIso && analysisTree.tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[it] > byCombinedIsolationDeltaBetaCorrRaw3Hits ) continue;
-	if (!InvertTauIso && analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[it] < 0.5 ) continue;
-	//if (!InvertTauIso && analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[it] < 0.5 ) continue;
+	if  (  string::npos != filen.find("stau") && !InvertTauIso && analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[it] < 0.5 ) continue;
+	if  (  string::npos == filen.find("stau") &&   !InvertTauIso && analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[it] < 0.5 ) continue;
 
-
+	if  (  string::npos != filen.find("stau"))
 	ta_IsoFlag=analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[it];
-	double  tauIso = analysisTree.tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[it];
 
-	if (tauIso<isoTauMin ) {
-	  //      cout<<"  there was a chenge  "<<tauIso<<"  "<<isoTauMin<<" it "<<it<<" tau_index "<<tau_index<<"  "<<analysisTree.tau_count<<endl;
+	if  (  string::npos == filen.find("stau"))
+	ta_IsoFlag=analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[it];	
+	
+	//double  tauIso = analysisTree.tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[it];
+	double  tauIso = ta_IsoFlag;
+
+
+	//if (tauIso<isoTauMin ) {
+	if (tauIso>0.5 ) {
+	       //cout<<"  there was a change  "<<tauIso<<"  "<<ta_IsoFlag<<" it "<<it<<" tau_index "<<(int)tau_index<<"  "<<analysisTree.tau_count<<endl;
 	  isoTauMin  = tauIso;
 	  tau_iso=true;
 	  tau_index = (int)it;
@@ -799,16 +824,6 @@ int main(int argc, char * argv[]) {
 
       // cout<< " Lets check  "<<mu_index <<"  "<<tau_index <<"  "<<endl;
       //cout<<"  "<<endl;
-      ////////////////////change to new tau inverted definition 
-      /*      double tauIsoI = analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[tau_index];
-	      if (tauIsoI > 0.5  && InvertTauIso) {isHighIsoTau =true;} 
-	      //else {isHighIsoTau =false ; isLowIsoTau=true;} 
-	      //if (isHighIsoTau && tauIso > 2*byCombinedIsolationDeltaBetaCorrRaw3Hits ) continue; 
-
-	      if (InvertTauIso && !isHighIsoTau) continue;
-	      if (!InvertTauIso && isHighIsoTau) continue;
-	      //if (InvertTauIso && isLowIsoTau) continue;
-	      */
 
       if ( fabs(analysisTree.tau_charge[tau_index]) !=1 ) continue;
       if ( fabs(analysisTree.muon_charge[mu_index]) != 1) continue;
@@ -819,12 +834,6 @@ int main(int argc, char * argv[]) {
 
       //if (q>0 && Sign=="OS" ) continue;
       //if (q<0 && Sign=="SS" ) continue;
-      /*
-	bool regionB = (q<0 && isLowIsoMu);
-	bool regionA = (q>0 && isLowIsoMu);
-	bool regionC = (q<0 && isHighIsoMu);
-	bool regionD = (q>0 && isHighIsoMu);
-      */
 
       if(fillplots)
 	FillMainHists(iCut, weight, ElMV, MuMV, TauMV,JetsMV,METV, ChiMass,mIntermediate,analysisTree, Channel, mu_index,el_index,tau_index);
@@ -1263,6 +1272,5 @@ int main(int argc, char * argv[]) {
   delete file;
 
 }
-
 
 
