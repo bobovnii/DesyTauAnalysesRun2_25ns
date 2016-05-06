@@ -775,22 +775,24 @@ int main(int argc, char * argv[]) {
 	if (fabs(analysisTree.tau_eta[it])> etaTauCut) continue;
 	if (analysisTree.tau_decayModeFinding[it]<decayModeFindingNewDMs) continue;
 	if ( fabs(analysisTree.tau_leadchargedhadrcand_dz[it])> leadchargedhadrcand_dz) continue;
-
-	if (string::npos == filen.find("stau")  && analysisTree.tau_againstElectronVLooseMVA6[it]<againstElectronVLooseMVA6) continue;
-	if (string::npos != filen.find("stau")  && analysisTree.tau_againstElectronVLooseMVA5[it]<againstElectronVLooseMVA5) continue;
+	///////////////// To fully switch in 76 later
+	//if (string::npos == filen.find("stau")  && analysisTree.tau_againstElectronVLooseMVA6[it]<againstElectronVLooseMVA6) continue;
+	//if (string::npos != filen.find("stau")  && analysisTree.tau_againstElectronVLooseMVA5[it]<againstElectronVLooseMVA5) continue;
+	if (analysisTree.tau_againstElectronVLooseMVA5[it]<againstElectronVLooseMVA5) continue;
 	if (analysisTree.tau_againstMuonTight3[it]<againstMuonTight3) continue;
 
 	//cout<<"  "<<analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[it]<<endl;
 	
 	////if (!InvertTauIso && analysisTree.tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[it] > byCombinedIsolationDeltaBetaCorrRaw3Hits ) continue;
-	if  (  string::npos != filen.find("stau") && !InvertTauIso && analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[it] < 0.5 ) continue;
-	if  (  string::npos == filen.find("stau") &&   !InvertTauIso && analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[it] < 0.5 ) continue;
+	//if  (  string::npos != filen.find("stau") && !InvertTauIso && analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[it] < 0.5 ) continue;
+	//if  (  string::npos == filen.find("stau") &&   !InvertTauIso && analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[it] < 0.5 ) continue;
+	if  (  !InvertTauIso && analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[it] < 0.5 ) continue;
 
-	if  (  string::npos != filen.find("stau"))
+	//if  (  string::npos != filen.find("stau"))
 	ta_IsoFlag=analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[it];
 
-	if  (  string::npos == filen.find("stau"))
-	ta_IsoFlag=analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[it];	
+	//if  (  string::npos == filen.find("stau"))
+	//ta_IsoFlag=analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[it];	
 	
 	//double  tauIso = analysisTree.tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[it];
 	double  tauIso = ta_IsoFlag;
