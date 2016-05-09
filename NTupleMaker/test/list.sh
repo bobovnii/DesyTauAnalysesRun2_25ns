@@ -1,7 +1,7 @@
-rm datasets${dir}
 
 dir=$1
 
+rm datasets${dir}
 #sources="/nfs/dust/cms/user/rasp/storage/76x_JECv2_MVAMET0p6/ /nfs/dust/cms/group/susy-desy/Run2/Stau/MC/25ns/76x_JECv2_MVAMET0p6/"
 sources="/nfs/dust/cms/user/rasp/storage/76x_JECv2_MVAMET0p6/"
 
