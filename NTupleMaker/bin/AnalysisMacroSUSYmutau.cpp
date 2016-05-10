@@ -43,6 +43,10 @@ int main(int argc, char * argv[]) {
   bool fillplots= false;
   const bool isData = cfg.get<bool>("IsData");
   const bool applyPUreweighting = cfg.get<bool>("ApplyPUreweighting");
+  
+  const string pileUpInDataFile = cfg.get<string>("pileUpInDataFile");
+  const string pileUpInMCFile = cfg.get<string>("pileUpInMCFile");
+  
   const bool applyLeptonSF = cfg.get<bool>("ApplyLeptonSF");
   const bool InvertTauIso = cfg.get<bool>("InvertTauIso");
   const bool InvertLeptonIso = cfg.get<bool>("InvertLeptonIso");
@@ -82,6 +86,12 @@ int main(int argc, char * argv[]) {
   const string SingleMuonTriggerFile  = cfg.get<string>("SingMuonTriggEff");
   const float singleMuonTriggerPtCut = cfg.get<float>("SingleMuonTriggerPtCut");
   const float singleMuonTriggerEtaCut = cfg.get<float>("SingleMuonTriggerEtaCut");
+
+
+
+  const string idIsoEffFile = cfg.get<string>("idIsoEffFile");
+  const string trigEffFile = cfg.get<string>("trigEffFile");
+
 
   const string Region  = cfg.get<string>("Region");
   const string Sign  = cfg.get<string>("Sign");
@@ -248,7 +258,7 @@ int main(int argc, char * argv[]) {
 
   vertexDataH->Scale(1/normVertexData);
   vertexMcH->Scale(1/normVertexMc);
-
+/*
   PileUp * PUofficial = new PileUp();
 
   TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/Data_Pileup_2015D_Nov17.root","read");
@@ -257,6 +267,16 @@ int main(int argc, char * argv[]) {
   TH1D * PU_mc = (TH1D *)filePUdistribution_MC->Get("pileup");
   PUofficial->set_h_data(PU_data);
   PUofficial->set_h_MC(PU_mc);
+*/
+  PileUp * PUofficial = new PileUp();
+  TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/"+TString(pileUpInDataFile),"read");
+  TFile * filePUdistribution_MC = new TFile (TString(cmsswBase)+"/src/"+TString(pileUpInMCFile), "read");
+  TH1D * PU_data = (TH1D *)filePUdistribution_data->Get("pileup");
+  TH1D * PU_mc = (TH1D *)filePUdistribution_MC->Get("pileup");
+  PUofficial->set_h_data(PU_data);
+  PUofficial->set_h_MC(PU_mc);
+
+
 
 
   TFile *f10= new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/"+muonSfDataBarrel);  // mu SF barrel data
@@ -287,11 +307,11 @@ int main(int argc, char * argv[]) {
   ScaleFactor * SF_muonIdIso; 
   if (applyLeptonSF) {
     SF_muonIdIso = new ScaleFactor();
-    SF_muonIdIso->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(MuonIdIsoFile));
+    SF_muonIdIso->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(idIsoEffFile));
   }
 
   ScaleFactor * SF_muonTrigger = new ScaleFactor();
-  SF_muonTrigger->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(SingleMuonTriggerFile));
+  SF_muonTrigger->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(trigEffFile));
 
   //////////////////////////////////////
   //////// Initialized TauFakeRates here
