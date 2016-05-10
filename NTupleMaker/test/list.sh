@@ -37,8 +37,8 @@ echo SingleElectron > SingleElectron
 rm GC*
 rm ${dir}/GC*
 
-rm SUSYGlu
-rm $dir/SUSYGlu*
+rm *Glu
+rm $dir/*Glu*
 
 rm AToZh*
 rm $dir/AToZh*
