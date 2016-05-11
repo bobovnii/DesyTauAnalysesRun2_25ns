@@ -20,7 +20,7 @@
  QCD_HT2000toInf 25.42
 
  ## for the ST_s we use the mc@nlo
- ST_s-channel_4f_leptonDecays 70.69
+ ST_s-channel_4f_leptonDecays 3.36
  ST_t-channel_4f_leptonDecays_ext1 70.69
  ST_tW_antitop_5f_DS_inclusiveDecays_13TeV-powheg-pythia8 35.85
  ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8 35.85
