@@ -365,7 +365,8 @@ int main(int argc, char * argv[]) {
   if (argv[4] != NULL  && atoi(argv[4])< nTotalFiles) nTotalFiles=atoi(argv[4]);
   //if (nTotalFiles>50) nTotalFiles=50;
   //nTotalFiles = 10;
-  for (int iF=0; iF<nTotalFiles; ++iF) {
+ 
+for (int iF=0; iF<nTotalFiles; ++iF) {
 
     std::string filen;
     fileList >> filen;
@@ -381,11 +382,9 @@ int main(int argc, char * argv[]) {
       inputEventsH->Fill(0.);
     std::cout << "      number of input events         = " << NE << std::endl;
 
-    /*TTree * _inittree = NULL;
-    _inittree = (TTree*)file_->Get(TString(initNtupleName));
-    std::cout << "      do vyileta         = " << NE << std::endl;
+    TTree * _inittree = NULL;
+    _inittree = (TTree*)file_->Get(TString(ntupleName));
     if (_inittree==NULL) continue;
-    std::cout << "      posle         = " << NE << std::endl;
     Float_t genweight;
     if (!isData)
       _inittree->SetBranchAddress("genweight",&genweight);
@@ -397,7 +396,7 @@ int main(int argc, char * argv[]) {
 	histWeightsH->Fill(0.,1.);
       //else
       //histWeightsH->Fill(0.,genweight);
-    }*/
+    }
 
     TTree * _tree = NULL;
     _tree = (TTree*)file_->Get(TString(ntupleName));
@@ -406,25 +405,36 @@ int main(int argc, char * argv[]) {
     std::cout << "      number of entries in Tree      = " << numberOfEntries << std::endl;
     AC1B analysisTree(_tree);
 
+    for (Long64_t iEntry=0; iEntry<numberOfEntries; ++iEntry) 
+		{
+		analysisTree.GetEntry(iEntry);
+		histWeightsH->Fill(0.,analysisTree.genweight);
+		//std::cout <<"analysisTree.genweight out of loop   "<< analysisTree.genweight << std::endl;
+		}
+
+
     float genweights=1;
     float topPt = -1;
     float antitopPt = -1;
     bool isZTT = false;
- /* 
-   if(!isData) 
-      {
 
-	TTree *genweightsTree = (TTree*)file_->Get("initroottree/AC1B");
+/*
+	TTree *genweightsTree = (TTree*)file_->Get("makeroottree/AC1B");
 	     
 	genweightsTree->SetBranchAddress("genweight",&genweights);
 	Long64_t numberOfEntriesInit = genweightsTree->GetEntries();
+    if(!isData) 
+      {
 	for (Long64_t iEntryInit=0; iEntryInit<numberOfEntriesInit; ++iEntryInit) { 
 	  genweightsTree->GetEntry(iEntryInit);
 	  histWeightsH->Fill(0.,genweights);
+		//std::cout <<"genweights "<< genweights << std::endl;
 	}
-    
+
       }
 */
+
+
 
 
     for (Long64_t iEntry=0; iEntry<numberOfEntries; ++iEntry) { 
@@ -457,7 +467,7 @@ int main(int argc, char * argv[]) {
       isLowIsoTau=false;
       isHighIsoTau = false;
 
-      Float_t genweights;
+      Float_t genweight;
       float topPt = 0;
       float antitopPt = 0;
       bool isZTT = false;
@@ -481,10 +491,11 @@ int main(int argc, char * argv[]) {
 				      analysisTree.genparticles_py[igen]*analysisTree.genparticles_py[igen]);
 
 	  }    
-				
+
 	  if (!isData ) {
 	    weight *= analysisTree.genweight;
 	    gen_weight *=analysisTree.genweight;
+	   // std::cout <<"analysisTree.genweight "<< float(analysisTree.genweight) << std::endl;
 	  }
 					
 				
@@ -664,13 +675,13 @@ int main(int argc, char * argv[]) {
 
       }
 
-      if (!isData && (   string::npos != filen.find("stau") || string::npos != filen.find("C1")) ) isMainTrigger = true;
+      if (!isData /*&& (   string::npos != filen.find("stau") || string::npos != filen.find("C1"))*/ ) isMainTrigger = true;
 
       if (!isMainTrigger) {
 	std::cout << "HLT filter for Mu18 " << MainTrigger << " not found" << std::endl;
 	return(-1);
       }
-*/
+
       /////now clear the Mu.El.Jets again to fill them again after cleaning
       MuMV.clear();
       ElMV.clear();
@@ -741,17 +752,17 @@ int main(int argc, char * argv[]) {
 	neutralIsoMu = TMath::Max(float(0),neutralIsoMu); 
 	float absIsoMu = chargedHadIsoMu + neutralIsoMu;
 	float relIsoMu = absIsoMu/analysisTree.muon_pt[mIndex];
-
-/*	for (unsigned int iT=0; iT<analysisTree.trigobject_count; ++iT) {
-	  if (analysisTree.trigobject_filters[iT][nMainTrigger]
-	      &&analysisTree.muon_pt[mIndex]>ptMuonHighCut&&
-	      analysisTree.trigobject_pt[iT]>PtMuonTriggerCut) { // IsoMu Leg
-	    float dRtrig = deltaR(analysisTree.muon_eta[mIndex],analysisTree.muon_phi[mIndex],
+	if (isData)
+	{	for (unsigned int iT=0; iT<analysisTree.trigobject_count; ++iT) {
+	  	if (analysisTree.trigobject_filters[iT][nMainTrigger]
+	      	&&analysisTree.muon_pt[mIndex]>ptMuonHighCut&&
+	      	analysisTree.trigobject_pt[iT]>PtMuonTriggerCut) { // IsoMu Leg
+	    	float dRtrig = deltaR(analysisTree.muon_eta[mIndex],analysisTree.muon_phi[mIndex],
 				  analysisTree.trigobject_eta[iT],analysisTree.trigobject_phi[iT]);
-	    if (dRtrig<deltaRTrigMatch) {
-	      isIsoMuonLegMatch = true;
-	    }
-	  }
+	    	if (dRtrig<deltaRTrigMatch) {
+	      	isIsoMuonLegMatch = true;
+	    	}
+	  	}
 
 	  //	  if (analysisTree.trigobject_filters[iT][nMuonTauMuonLeg]) { // MuonTau Muon Leg
 	  //	    float dRtrig = deltaR(analysisTree.muon_eta[mIndex],analysisTree.muon_phi[mIndex],
@@ -767,10 +778,11 @@ int main(int argc, char * argv[]) {
 	  //	      isMuonTauOverlapMuonMatch = true;
 	  //	    }
 	  //	  }
-	}*/
+		}
+	}
 
-        //if (!isData && ( string::npos != filen.find("stau")  || string::npos != filen.find("C1") ) ) isIsoMuonLegMatch = true; 
-	isIsoMuonLegMatch = true; ///////////////// always true
+        if (!isData /*&& ( string::npos != filen.find("stau")  || string::npos != filen.find("C1") )*/ ) isIsoMuonLegMatch = true; 
+
 
 	for (unsigned int it=0; it<taus.size(); ++it) {
 
@@ -912,7 +924,8 @@ int main(int argc, char * argv[]) {
           ta_IsoFlag=analysisTree.tau_byMediumCombinedIsolationDeltaBetaCorr3Hits[tau_index];
 	}
  
-      float isoTau = analysisTree.tau_byCombinedIsolationDeltaBetaCorrRaw3Hits[tau_index];
+	if (!tauPass) continue;
+
       ta_relIso[0]=isoTauMin;
       mu_relIso[0]=isoMuMin;
       
@@ -1298,8 +1311,8 @@ int main(int argc, char * argv[]) {
 
   //gen_weight  = histWeightsH->GetSumOfWeights();
   //gen_weight.Fill;
-/*
-  cout<<" Total events  "<<nEvents<<"  Will use weight  "<<histWeightsH->GetSumOfWeights()<<" Norm Factor for a Lumi of "<<Lumi<<"/pb is "<<XSec*Lumi/( histWeightsH->GetSumOfWeights())<<endl;*/
+
+  cout<<" Total events  "<<nEvents<<"  Will use weight  "<<histWeightsH->GetSumOfWeights()<<" Norm Factor for a Lumi of "<<Lumi<<"/pb is "<<XSec*Lumi/( histWeightsH->GetSumOfWeights())<<endl;
   cout<<" First content "<<CFCounter[0]<<endl;
   cout<<" Run range from -----> "<<RunMin<<" to  "<<RunMax<<endl;
 
@@ -1320,11 +1333,11 @@ int main(int argc, char * argv[]) {
       CutFlowUnW->SetBinContent(1+ci,float(CFCounter[ci]) );
 
 
- //     CFCounter[ci] *= float(XSec*Lumi/( histWeightsH->GetSumOfWeights()));
+      CFCounter[ci] *= float(XSec*Lumi/( histWeightsH->GetSumOfWeights()));
 
       CutFlow->SetBinContent(1+ci,float(CFCounter[ci]));
 
- /*     cout << " i "<<ci<<" iCFCounter "<<iCFCounter[ci]<<" CFCounter  "<<CFCounter[ci]<<" CFCounter_ " <<CFCounter_[ci]<<"  "<<XSec*Lumi/( histWeightsH->GetSumOfWeights())<<" UnWBinContent "<<CutFlowUnW->GetBinContent(1+ci)<<" Norm to Lumi Content "<<CutFlow->GetBinContent(1+ci)<<" Cut "<<CutList[ci]<<endl;   */
+      cout << " i "<<ci<<" iCFCounter "<<iCFCounter[ci]<<" CFCounter  "<<CFCounter[ci]<<" CFCounter_ " <<CFCounter_[ci]<<"  "<<XSec*Lumi/( histWeightsH->GetSumOfWeights())<<" UnWBinContent "<<CutFlowUnW->GetBinContent(1+ci)<<" Norm to Lumi Content "<<CutFlow->GetBinContent(1+ci)<<" Cut "<<CutList[ci]<<endl;   
       if (iCFCounter[ci] <0.2) statUnc[ci] =0;
       else statUnc[ci] = sqrt(CFCounter[ci]);
     }
@@ -1343,7 +1356,7 @@ int main(int argc, char * argv[]) {
   hxsec->Fill(XSec);
   hxsec->Write();
   inputEventsH->Write();
-//  histWeightsH->Write();
+  histWeightsH->Write();
   histRuns->Write();
   CutFlowUnW->Write();
   CutFlow->Write();
