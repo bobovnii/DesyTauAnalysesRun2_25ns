@@ -156,8 +156,8 @@ int main(int argc, char * argv[]) {
   const string Electron17TriggerFile = cfg.get<string>("Electron17TriggerEff");
   const string Electron12TriggerFile = cfg.get<string>("Electron12TriggerEff");
 
-  const string MuonIdIsoFile = cfg.get<string>("MuonIdIsoEffMuEl");
-  const string ElectronIdIsoFile = cfg.get<string>("ElectronIdIsoEffMuEl");
+  const string MuonIdIsoFile = cfg.get<string>("MuonIdIsoEff");
+  const string ElectronIdIsoFile = cfg.get<string>("ElectronIdIsoEff");
 
 
 
@@ -876,7 +876,7 @@ for (int iF=0; iF<nTotalFiles; ++iF) {
 	  //	  std::cout << "Trigger match = " << trigMatch << std::endl;
 
 	  if (applyTriggerMatch && !isSUSY && !trigMatch) continue;
-
+cout << 5<< endl;
 
 
 	  float neutralHadIsoEle = analysisTree.electron_neutralHadIso[eIndex];
@@ -942,6 +942,7 @@ for (int iF=0; iF<nTotalFiles; ++iF) {
 
       if ((int)el_index<0) continue;
       if ((int)mu_index<0) continue;
+cout << 6<< endl;
       //      std::cout << "Post synch selection " << std::endl;
       //      std::cout << std::endl;
 
