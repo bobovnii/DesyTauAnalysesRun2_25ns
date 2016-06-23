@@ -254,9 +254,18 @@ int main(int argc, char * argv[]) {
   // reweighting with vertices
 
 
-  PileUp * PUofficial = new PileUp();
+  /*PileUp * PUofficial = new PileUp();
   TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/pileUp_data_2016B_Cert_271036-274421.root","read");
   TFile * filePUdistribution_MC = new TFile (TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/MC_Spring16_PU.root","read");
+  TH1D * PU_data = (TH1D *)filePUdistribution_data->Get("pileup");
+  TH1D * PU_mc = (TH1D *)filePUdistribution_MC->Get("pileup");
+  PUofficial->set_h_data(PU_data);
+  PUofficial->set_h_MC(PU_mc);*/
+
+  // PU reweighting
+  PileUp * PUofficial = new PileUp();
+  TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/Data_Run2016B_pileup.root","read");
+  TFile * filePUdistribution_MC = new TFile (TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/MC_Spring2016_pileup.root", "read");
   TH1D * PU_data = (TH1D *)filePUdistribution_data->Get("pileup");
   TH1D * PU_mc = (TH1D *)filePUdistribution_MC->Get("pileup");
   PUofficial->set_h_data(PU_data);
@@ -329,7 +338,6 @@ int main(int argc, char * argv[]) {
   ScaleFactor * SF_electronIdIso = new ScaleFactor();
   SF_electronIdIso->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(ElectronIdIsoFile));
   ScaleFactor * SF_electron17 = new ScaleFactor();
-  
   SF_electron17->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(Electron17TriggerFile));
   ScaleFactor * SF_electron12 = new ScaleFactor();
   SF_electron12->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(Electron12TriggerFile));
@@ -679,7 +687,8 @@ for (int iF=0; iF<nTotalFiles; ++iF) {
       if (!isData) 
 	{
 	  if (applyPUreweighting)	 {
-	    puweight = float(PUofficial->get_PUweight(double(analysisTree.numtruepileupinteractions)));
+	    /*puweight = float(PUofficial->get_PUweight(double(analysisTree.numtruepileupinteractions)));*/
+		puweight = float(PUofficial->get_PUweight(double(analysisTree.primvertex_count)));
 	    weight *=puweight; 
 	    pu_weight = puweight;
 	  }
@@ -797,7 +806,6 @@ for (int iF=0; iF<nTotalFiles; ++iF) {
 
       if (electrons.size()==0) continue;
       if (muons.size()==0) continue;
-      
       // selecting muon and electron pair (OS or SS);
 
       float isoMuMin = 1e+10;
@@ -841,7 +849,7 @@ for (int iF=0; iF<nTotalFiles; ++iF) {
 	  }
 	}
 	
-	if (applyTriggerMatch && (!isMu17) && (!isMu8)) continue;
+	if (applyTriggerMatch && (!isMu17) && (!isMu8) && !isSUSY) continue;
 	  bool isEle17 = false;
 	  bool isEle12 = false;
 
@@ -876,7 +884,6 @@ for (int iF=0; iF<nTotalFiles; ++iF) {
 	  //	  std::cout << "Trigger match = " << trigMatch << std::endl;
 
 	  if (applyTriggerMatch && !isSUSY && !trigMatch) continue;
-cout << 5<< endl;
 
 
 	  float neutralHadIsoEle = analysisTree.electron_neutralHadIso[eIndex];
@@ -942,7 +949,6 @@ cout << 5<< endl;
 
       if ((int)el_index<0) continue;
       if ((int)mu_index<0) continue;
-cout << 6<< endl;
       //      std::cout << "Post synch selection " << std::endl;
       //      std::cout << std::endl;
 
