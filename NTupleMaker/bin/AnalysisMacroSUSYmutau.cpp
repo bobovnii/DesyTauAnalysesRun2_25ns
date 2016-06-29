@@ -436,12 +436,15 @@ for (int iF=0; iF<nTotalFiles; ++iF) {
     std::cout << "      number of entries in Tree      = " << numberOfEntries << std::endl;
     AC1B analysisTree(_tree);
 
-    for (Long64_t iEntry=0; iEntry<numberOfEntries; ++iEntry) 
-		{
-		analysisTree.GetEntry(iEntry);
-		histWeightsH->Fill(0.,analysisTree.genweight);
-		//std::cout <<"analysisTree.genweight out of loop   "<< analysisTree.genweight << std::endl;
+	if (!isData)
+		{    
+		for (Long64_t iEntry=0; iEntry<numberOfEntries; ++iEntry) 
+			{
+			analysisTree.GetEntry(iEntry);
+			histWeightsH->Fill(0.,analysisTree.genweight);
+			}
 		}
+
 
 
     float genweights=1;
