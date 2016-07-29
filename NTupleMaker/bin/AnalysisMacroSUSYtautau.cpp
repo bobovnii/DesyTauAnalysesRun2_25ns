@@ -114,7 +114,7 @@ cout <<"4  "<< argv[4] <<endl;
   //if (isData) TrigLeg  = cfg.get<string>("El23LegData");
  // const float singleElectronTriggerPtCut = cfg.get<float>("SingleElectronTriggerPtCuteltau");
  // const float singleElectronTriggerEtaCut = cfg.get<float>("SingleElectronTriggerEtaCuteltau");
-    const float SingleElectronTriggerPtCut = cfg.get<float>("SingleElectronTriggerPtCut");
+    const float MuonTriggerPtCut = cfg.get<float>("MuonTriggerPtCut");
 
   const string Region  = cfg.get<string>("Region");
   const string Sign  = cfg.get<string>("Sign");
@@ -183,10 +183,8 @@ cout <<"4  "<< argv[4] <<endl;
   CutList.push_back("No cut");
   CutList.push_back("No cut after PU");
   CutList.push_back("tau-tau");
-  CutList.push_back("DiElectron-Veto");
   CutList.push_back("3rd lepV");
   CutList.push_back("Trigger SF");
-  CutList.push_back("Lepton SF");
   CutList.push_back("TauFakeRate");
   CutList.push_back("topPtRwgt");
   CutList.push_back("Cleaned jets");
@@ -784,7 +782,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
       vector<int> taus; taus.clear();
 	vector<int> trigOb; trigOb.clear();
-
+	bool trigMatch = false;
       for (unsigned int it = 0; it<analysisTree.tau_count; ++it) {
 
         if (analysisTree.tau_decayModeFinding[it]<=0.5) continue;
@@ -803,6 +801,27 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
      	if (!tauPass) continue;
 
+	bool isTauFilterNameMatch = false;
+	if (isData)
+	{
+		for (unsigned int iT1=0; iT1<analysisTree.trigobject_count; ++iT1) 
+		{
+		  if (analysisTree.trigobject_filters[iT1][nMainTrigger]
+	 	     &&analysisTree.tau_pt[it]>ptTauCutTauTau&&
+	   	   analysisTree.trigobject_pt[iT1]>MuonTriggerPtCut) 
+		{ // 1st tau
+	   	 float dRtrig1 = deltaR(analysisTree.tau_eta[it],analysisTree.tau_phi[it],
+					  analysisTree.trigobject_eta[iT1],analysisTree.trigobject_phi[iT1]);
+	   	 if (dRtrig1<deltaRTrigMatch) {
+	    	  isTauFilterNameMatch = true;
+						}
+		}
+		}
+	}
+
+      if (!isData/* &&  ( string::npos != filen.find("stau") || string::npos != filen.find("C1"))*/ )  {isTauFilterNameMatch = true;}
+	trigMatch = isTauFilterNameMatch;	
+	 if (!trigMatch) continue;
         taus.push_back(it);
 
       }
@@ -810,13 +829,17 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
       if (taus.size()==0) continue;
 
-      float ptTau1 = 0;
+
+
+
+	bool FindPair = false;
 	for (unsigned int it1=0; it1<taus.size(); ++it1) 
 	{
-	      float ptTau2 = 0;
-	for (unsigned int it2=0; it2<taus.size(); ++it2) 
+	 if (FindPair) continue;
+	for (unsigned int it2=it1+1; it2<taus.size(); ++it2) 
 	{
 	if (it1==it2) continue;
+	if (FindPair) continue;
 	  unsigned int tIndex1 = taus.at(it1);
 	  unsigned int tIndex2 = taus.at(it2);
 
@@ -826,73 +849,42 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	  if (dR<dRleptonsCutTauTau) continue;
 
 
-	bool isTauFilterNameMatch1 = false;
+	/*bool isTauFilterNameMatch1 = false;
 	bool isTauFilterNameMatch2 = false;
 	if (isData)
 	{
 	for (unsigned int iT1=0; iT1<analysisTree.trigobject_count; ++iT1) {
 	  if (analysisTree.trigobject_filters[iT1][nMainTrigger]
 	      &&analysisTree.tau_pt[it1]>ptTauCutTauTau&&
-	      analysisTree.trigobject_pt[iT1]>SingleElectronTriggerPtCut) { // 1st tau
-	    float dRtrig1 = deltaR(analysisTree.electron_eta[it1],analysisTree.electron_phi[it1],
+	      analysisTree.trigobject_pt[iT1]>MuonTriggerPtCut) { // 1st tau
+	    float dRtrig1 = deltaR(analysisTree.tau_eta[it1],analysisTree.tau_phi[it1],
 				  analysisTree.trigobject_eta[iT1],analysisTree.trigobject_phi[iT1]);
 	    if (dRtrig1<deltaRTrigMatch) {
 	      isTauFilterNameMatch1 = true;
-
-			for (unsigned int iT2=0; iT2<analysisTree.trigobject_count; ++iT2) {
-	  			if (analysisTree.trigobject_filters[iT2][nMainTrigger]
-	      			&&analysisTree.tau_pt[it2]>ptTauCutTauTau&&
-	      			analysisTree.trigobject_pt[iT2]>SingleElectronTriggerPtCut /*&& iT1!=iT2*/) { //2nd tayu
-	    				float dRtrig2 = deltaR(analysisTree.electron_eta[it2],analysisTree.electron_phi[it2],
-				 	 analysisTree.trigobject_eta[iT2],analysisTree.trigobject_phi[iT2]);
-	    					if (dRtrig2<deltaRTrigMatch) {
-	      					isTauFilterNameMatch2 = true;
-						}
-				}
+		cout <<"isTauFilterNameMatch1"<<endl;
+ 		if (analysisTree.trigobject_filters[iT1][nMainTrigger]
+			&&analysisTree.tau_pt[it2]>ptTauCutTauTau&&
+	      		analysisTree.trigobject_pt[iT1]>MuonTriggerPtCut) { //2nd tayu
+cout <<"analysisTree.tau_pt[it2]"<<endl;	
+cout <<"proshol"<<endl;
+	    	float dRtrig2 = deltaR(analysisTree.tau_eta[it2],analysisTree.tau_phi[it2],
+			analysisTree.trigobject_eta[iT1],analysisTree.trigobject_phi[iT1]);
+cout <<dRtrig2<<endl;
+	    	if (dRtrig2<deltaRTrigMatch) 
+			{
+	      		isTauFilterNameMatch2 = true;
+			cout <<"isTauFilterNameMatch2"<<endl;
+			}
 			}
 
 
 	    }
 	  }
 	 }
-	}
-      if (!isData/* &&  ( string::npos != filen.find("stau") || string::npos != filen.find("C1"))*/ )  {isTauFilterNameMatch1 = true; isTauFilterNameMatch2 = true;}
-	bool trigMatch = isTauFilterNameMatch1 && isTauFilterNameMatch2;
-
-
-
-
-	
-	 //if (!trigMatch) continue;
-	/*  
-	  float isoTauMin1 = 1;
-	  float isoTauMin2 = 1;
-	  float isoTau1 =1;
-	  float isoTau2 =1;
-*/
-
-
-
-// isoTau1 = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tIndex1];
-//   isoTau2 = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tIndex2];
-
-
-	if (analysisTree.tau_pt[tIndex1]>ptTau1)
-	{
-	ptTau1 = analysisTree.tau_pt[tIndex1];
-	ptTau2 = analysisTree.tau_pt[tIndex2];
+	}*/
 	tau_index1 = int(tIndex1);
 	tau_index2 = int(tIndex2);
-	}
-	if (analysisTree.tau_pt[tIndex1] == ptTau1)
-	{
-		if (analysisTree.tau_pt[tIndex2]>ptTau2)
-		{
-		ptTau2 = analysisTree.tau_pt[tIndex2];
-		tau_index2 = int(tIndex2);
-		}
-	}
-
+	FindPair = true;
 
       }
       }
@@ -1015,12 +1007,6 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
    	event_secondLeptonVeto = dilepton_veto;
 
 
-
-      CFCounter[iCut]+= weight;
-      CFCounter_[iCut]+= weight;
-      iCFCounter[iCut]++;
-      iCut++;
-
         if(extraelec_veto || extramuon_veto)   event_secondLeptonVeto = true;
 	if (extraelec_veto) continue;
 	if (extramuon_veto) continue;
@@ -1059,22 +1045,6 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	weight *= trigweight;
 	trig_weight = trigweight;*/
 
-
-      CFCounter[iCut]+= weight;
-      CFCounter_[iCut]+= weight;
-      iCFCounter[iCut]++;
-      iCut++;
-
-	///////////Lepton SF
-     /* if (!isData && applyLeptonSF) {
-
-	//leptonSFweight = SF_yourScaleFactor->get_ScaleFactor(pt, eta)	
-	double IdIsoSF_el1 = SF_elIdIso->get_ScaleFactor(ptEl1, etaEl1);
-
-	ElSF_IdIso_El1H->Fill(IdIsoSF_el1);
-	weight *= IdIsoSF_el1;
-	LSF_weight = IdIsoSF_el1;
-      }*/
 
       CFCounter[iCut]+= weight;
       CFCounter_[iCut]+= weight;
