@@ -119,7 +119,7 @@ cout <<"4  "<< argv[4] <<endl;
   const string Region  = cfg.get<string>("Region");
   const string Sign  = cfg.get<string>("Sign");
 
-// const string SingleElectronTriggerFile = cfg.get<string>("ElectrontrigEffFile");
+ const string SingleTauTriggerFile = cfg.get<string>("SingleTauTriggerFile");
 
   const double leadchargedhadrcand_dz = cfg.get<double>("leadchargedhadrcand_dz");
   const double leadchargedhadrcand_dxy = cfg.get<double>("leadchargedhadrcand_dxy");
@@ -303,10 +303,10 @@ cout << "ff  " << ff << endl;
     SF_elIdIso->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(ElectronIdIsoFile));
   }
 */
-/*	cout<<" Initializing Trigger SF files....."<<endl;
-  ScaleFactor * SF_electronTrigger = new ScaleFactor();
-  SF_electronTrigger->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(SingleElectronTriggerFile));
-*/
+	cout<<" Initializing Trigger SF files....."<<endl;
+  ScaleFactor * SF_tauTrigger = new ScaleFactor();
+  SF_tauTrigger->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(SingleTauTriggerFile));
+
 /*  cout<<" Will try to initialize the TFR now.... "<<endl;
   ScaleFactor * SF_TFR; 
   bool applyTFR = true;
@@ -796,12 +796,12 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
 		tauPass=
 	  	  analysisTree.tau_againstElectronVLooseMVA6[it]>0.5 &&
-	 	  analysisTree.tau_againstMuonTight3[it]>0.5 &&
-	  	  analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[it] > 0.5;
+	 	  analysisTree.tau_againstMuonTight3[it]>0.5 /*&&
+	  	  analysisTree.tau_byVTightIsolationMVArun2v1DBoldDMwLT[it] > 0.5*/;
 
      	if (!tauPass) continue;
 
-	bool isTauFilterNameMatch = false;
+	/*bool isTauFilterNameMatch = false;
 	if (isData)
 	{
 		for (unsigned int iT1=0; iT1<analysisTree.trigobject_count; ++iT1) 
@@ -818,10 +818,10 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 		}
 		}
 	}
-
-      if (!isData/* &&  ( string::npos != filen.find("stau") || string::npos != filen.find("C1"))*/ )  {isTauFilterNameMatch = true;}
-	trigMatch = isTauFilterNameMatch;	
-	 if (!trigMatch) continue;
+*/
+  //    if (!isData/* &&  ( string::npos != filen.find("stau") || string::npos != filen.find("C1"))*/ )  {isTauFilterNameMatch = true;}
+	/*trigMatch = isTauFilterNameMatch;	
+	 if (!trigMatch) continue;*/
         taus.push_back(it);
 
       }
@@ -849,7 +849,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	  if (dR<dRleptonsCutTauTau) continue;
 
 
-	/*bool isTauFilterNameMatch1 = false;
+	bool isTauFilterNameMatch1 = false;
 	bool isTauFilterNameMatch2 = false;
 	if (isData)
 	{
@@ -861,19 +861,17 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 				  analysisTree.trigobject_eta[iT1],analysisTree.trigobject_phi[iT1]);
 	    if (dRtrig1<deltaRTrigMatch) {
 	      isTauFilterNameMatch1 = true;
-		cout <<"isTauFilterNameMatch1"<<endl;
- 		if (analysisTree.trigobject_filters[iT1][nMainTrigger]
+
+	for (unsigned int iT2=0; iT2<analysisTree.trigobject_count; ++iT2) {
+ 		if (analysisTree.trigobject_filters[iT2][nMainTrigger]
 			&&analysisTree.tau_pt[it2]>ptTauCutTauTau&&
-	      		analysisTree.trigobject_pt[iT1]>MuonTriggerPtCut) { //2nd tayu
-cout <<"analysisTree.tau_pt[it2]"<<endl;	
-cout <<"proshol"<<endl;
+	      		analysisTree.trigobject_pt[iT2]>MuonTriggerPtCut && iT2!=iT1) { //2nd tayu
 	    	float dRtrig2 = deltaR(analysisTree.tau_eta[it2],analysisTree.tau_phi[it2],
-			analysisTree.trigobject_eta[iT1],analysisTree.trigobject_phi[iT1]);
-cout <<dRtrig2<<endl;
+			analysisTree.trigobject_eta[iT2],analysisTree.trigobject_phi[iT2]);
 	    	if (dRtrig2<deltaRTrigMatch) 
 			{
 	      		isTauFilterNameMatch2 = true;
-			cout <<"isTauFilterNameMatch2"<<endl;
+			}
 			}
 			}
 
@@ -881,7 +879,11 @@ cout <<dRtrig2<<endl;
 	    }
 	  }
 	 }
-	}*/
+	}
+
+      if (!isData/* &&  ( string::npos != filen.find("stau") || string::npos != filen.find("C1"))*/ )  {isTauFilterNameMatch1 = true;isTauFilterNameMatch2 = true;}
+	trigMatch = isTauFilterNameMatch1 && isTauFilterNameMatch2;	
+	 if (!trigMatch) continue;
 	tau_index1 = int(tIndex1);
 	tau_index2 = int(tIndex2);
 	FindPair = true;
@@ -897,7 +899,15 @@ cout <<dRtrig2<<endl;
 	float isoTau1 = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tau_index1];
    	float isoTau2 = analysisTree.tau_byIsolationMVArun2v1DBoldDMwLTraw[tau_index2];
 
-       ta_IsoFlag=analysisTree.tau_byTightIsolationMVArun2v1DBoldDMwLT[tau_index];
+         ta1_IsoFlagVTight = analysisTree.tau_byVTightIsolationMVArun2v1DBoldDMwLT[tau_index1];
+         ta2_IsoFlagVTight = analysisTree.tau_byVTightIsolationMVArun2v1DBoldDMwLT[tau_index2];
+         ta1_IsoFlagLoose = analysisTree.tau_byLooseIsolationMVArun2v1DBoldDMwLT[tau_index1];
+         ta2_IsoFlagLoose = analysisTree.tau_byLooseIsolationMVArun2v1DBoldDMwLT[tau_index2];
+         ta1_IsoFlagMedium = analysisTree.tau_byMediumIsolationMVArun2v1DBoldDMwLT[tau_index1];
+         ta2_IsoFlagMedium = analysisTree.tau_byMediumIsolationMVArun2v1DBoldDMwLT[tau_index2];
+
+
+
 
       ta_relIso[0]= isoTau1;
       el_relIso[0] = isoTau2;
@@ -1024,16 +1034,19 @@ cout <<dRtrig2<<endl;
       /////////////////////////////////
       // Apply trigger SF
       // ////////////////////////////
-    /*  double ptEl1 = (double)analysisTree.electron_pt[el_index];
-      double etaEl1 = (double)analysisTree.electron_eta[el_index];
+      double ptTau1 = (double)analysisTree.tau_pt[tau_index1];
+      double etaTau1 = (double)analysisTree.tau_eta[tau_index1];
+      double ptTau2 = (double)analysisTree.tau_pt[tau_index2];
+      double etaTau2 = (double)analysisTree.tau_eta[tau_index2];
       float trigweight=1.;
 
 
-      float El22EffData = (float)SF_electronTrigger->get_EfficiencyData(double(ptEl1),double(etaEl1));
-      *//*float El22EffMC   = (float)SF_electronTrigger->get_EfficiencyMC(double(ptEl1),double(etaEl1));*/
-
-     /* if (!isData) {
-	if (El22EffMC>1e-6)
+      float Tau35EffData1 = (float)SF_tauTrigger->get_EfficiencyData(double(ptTau1),double(etaTau1));
+      float Tau35EffData2 = (float)SF_tauTrigger->get_EfficiencyData(double(ptTau2),double(etaTau2));
+      /*float El22EffMC   = (float)SF_tauTrigger->get_EfficiencyMC(double(ptEl1),double(etaEl1));*/
+/*
+      if (!isData) {
+	if (Tau35EffData>1e-6)
 	  trigweight = El22EffData / El22EffMC;
 	if (!isData &&  ( string::npos != filen.find("stau") || string::npos != filen.find("C1")) )  trigweight = El22EffData;
 	weight *= trigweight;
@@ -1041,9 +1054,9 @@ cout <<dRtrig2<<endl;
       }
 	*/
 
-	/*if (!isData) trigweight = El22EffData;
+	if (!isData) trigweight = Tau35EffData1 * Tau35EffData2;
 	weight *= trigweight;
-	trig_weight = trigweight;*/
+	trig_weight = trigweight;
 
 
       CFCounter[iCut]+= weight;
@@ -1226,11 +1239,11 @@ cout <<dRtrig2<<endl;
 	jet_isLoose[jet] = isPFJetId;
 	bool cleanedJet = true;
 	//				cout<<"  jet is Loose "<<isPFJetId<<"  "<<jet_isLoose[jet]<<"  "<<iEntry<<endl;
-	double Dr=deltaR(analysisTree.electron_eta[el_index],analysisTree.electron_phi[el_index],
+	double Dr=deltaR(analysisTree.tau_eta[tau_index1],analysisTree.tau_phi[tau_index1],
 			  analysisTree.pfjet_eta[jet],analysisTree.pfjet_phi[jet]);
 	if (  Dr  < DRmax)  cleanedJet=false;
 
-	double Drr=deltaR(analysisTree.tau_eta[tau_index],analysisTree.tau_phi[tau_index],
+	double Drr=deltaR(analysisTree.tau_eta[tau_index2],analysisTree.tau_phi[tau_index2],
 			  analysisTree.pfjet_eta[jet],analysisTree.pfjet_phi[jet]);
 
 	if (  Drr  < DRmax)  cleanedJet=false;
