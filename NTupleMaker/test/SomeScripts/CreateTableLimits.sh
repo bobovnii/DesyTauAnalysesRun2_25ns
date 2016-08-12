@@ -28,9 +28,12 @@
 	echo A priori `grep --color=always "Expected 84.0%" $tempfile` 
 
 	pmx=${mass} 
-	pmy=${masslsp} 
-	pxsec=5 
+	pmy=${masslsp}
+
+	pxsec=`grep "${model}${mass}_LSP${masslsp} " xsecs | cut -d " " -f3` 
+	echo XSEC $pxsec foor "${model}${mass}_LSP${masslsp}"
 	pobs=$pexp 
 	pobsup=$pup 
 	pobsdown=$pdown 
- 	echo $pmx $pmy $pxsec $pobs $pobsup $pobsdown $pexp $pup $pdown $sigobs $sigexp >> TESTout 
+ 	echo $pmx $pmy $pxsec $pobs $pobsup $pobsdown $pexp $pup $pdown $sigobs $sigexp >> TABLE${model}_$var
+	rm $tempfile
