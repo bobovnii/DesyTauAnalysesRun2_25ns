@@ -35,5 +35,5 @@
 	pobs=$pexp 
 	pobsup=$pup 
 	pobsdown=$pdown 
- 	echo $pmx $pmy $pxsec $pobs $pobsup $pobsdown $pexp $pup $pdown $sigobs $sigexp >> TABLE${model}_$var
+ 	echo " "$pmx $pmy $pxsec $pobs $pobsup $pobsdown $pexp $pup $pdown $sigobs $sigexp >> TABLE${model}_$var
 	rm $tempfile
