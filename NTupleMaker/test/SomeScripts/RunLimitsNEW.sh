@@ -1,8 +1,11 @@
 
 #variables="DZeta_MTsum DZeta_MTtot met_DZeta met_MCTb met_MT met_MTsum met_MTtot MTsum_MCTb MTtot_MCTb"
 #variables="MT2lester_MCTb MT2lester_met MT2lester_DZeta"
-variables="MT2lester_met"
+#variables="MT2lester_met"
+#variables="DZeta_MTsum DZeta_MTtot met_DZeta met_MCTb met_MT met_MTsum met_MTtot MTsum_MCTb MTtot_MCTb MT2lester_DZeta"
+#variables="DZeta_MCTb MT2lester_MCTb"
 
+variables="DZeta_MTsum DZeta_MTtot met_DZeta met_MCTb met_MT met_MTsum met_MTtot MTsum_MCTb MTtot_MCTb MT2lester_DZeta MT2lester_MCTb MT2lester_met"
 
 massp=$1
 lspp=$2
