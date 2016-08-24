@@ -1,1 +1,9 @@
-Some additional scripts to put in STau directory
+Some additional scripts to put in STau directory to produce TABLES for making 2D plots
+Some additional folders (outputTEST and combinedTEST) need to be created to not have overlap with previus results 
+or you can rename folders in RunLimitsNew.sh
+
+after running wrapper.sh TABLES will be produced, and can be used directly in ra4_stats
+
+git clone https://github.com/ald77/ra4_stats
+cd ra4_stats/
+./compile.sh && ./run/limit_scan.exe -f txt/T1tttt_limit_scan.txt
