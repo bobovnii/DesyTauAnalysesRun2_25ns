@@ -173,7 +173,7 @@ void analyzer::Loop(){
 		if ( jentry%100000 ==0 ) cout<<" working for you...processed " <<jentry<<" events from "<<nentries<<" dataset "<<datasetName->c_str()<<" weight "<<all_weights<< endl;
 
 
-		//if (isData && met_flag<0.5) continue;	
+		if (isData && met_flag<0.5) continue;	
 
 		JetsMV.clear();
 		MuMV.clear();
