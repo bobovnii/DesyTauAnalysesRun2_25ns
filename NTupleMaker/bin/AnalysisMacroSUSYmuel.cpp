@@ -22,7 +22,7 @@
 #include "TGraphAsymmErrors.h"
 #include <stdlib.h>
 #include "TRandom.h"
-#include "FWCore/ParameterSet/interface/FileInPath.h"
+//#include "FWCore/ParameterSet/interface/FileInPath.h"
 
 #include "DesyTauAnalyses/NTupleMaker/interface/json.h"
 #include "DesyTauAnalyses/NTupleMaker/interface/PileUp.h"
@@ -145,10 +145,10 @@ int main(int argc, char * argv[]) {
   TString LowPtLegMuon(lowPtLegMuon);
   TString HighPtLegMuon(highPtLegMuon);
 
-  const string Muon17TriggerFile = cfg.get<string>("Muon17TriggerEff");
+  const string Muon23TriggerFile = cfg.get<string>("Muon23TriggerEff");
   const string Muon8TriggerFile = cfg.get<string>("Muon8TriggerEff");
 
-  const string Electron17TriggerFile = cfg.get<string>("Electron17TriggerEff");
+  const string Electron23TriggerFile = cfg.get<string>("Electron23TriggerEff");
   const string Electron12TriggerFile = cfg.get<string>("Electron12TriggerEff");
 
   const string MuonIdIsoFile = cfg.get<string>("MuonIdIsoEffMuEl");
@@ -181,7 +181,6 @@ int main(int argc, char * argv[]) {
 
   const double Lumi   = cfg.get<double>("Lumi");
   const double bTag   = cfg.get<double>("bTag");
-  const double metcut = cfg.get<double>("metcut");
 
   CutList.clear();
   CutList.push_back("No cut");
@@ -249,42 +248,22 @@ int main(int argc, char * argv[]) {
 
   sprintf(ff,"%s/%s",argv[3],argv[2]);
 
-  // reweighting with vertices
-
-
 // PU reweighting
   PileUp * PUofficial = new PileUp();
-  TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/Data_Run2016B_pileup.root","read");
-  TFile * filePUdistribution_MC = new TFile (TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/MC_Spring2016_pileup.root", "read");
+  //TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/Data_Run2016B_pileup.root","read");
+  //TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/pileUp_data_2016_Cert_Cert_271036-276811_NoL1T_xsec63mb.root","read");
+  TFile * filePUdistribution_data = new TFile(TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/pileUp_data_Cert_271036-276811_13TeV_PromptReco_Collisions16_xsec69p2mb.root","read");
+  TFile * filePUdistribution_MC = new TFile (TString(cmsswBase)+"/src/DesyTauAnalyses/NTupleMaker/data/PileUpDistrib/MC_Spring16_PU.root", "read");
   TH1D * PU_data = (TH1D *)filePUdistribution_data->Get("pileup");
   TH1D * PU_mc = (TH1D *)filePUdistribution_MC->Get("pileup");
   PUofficial->set_h_data(PU_data);
   PUofficial->set_h_MC(PU_mc);
 
-
-
-  // qcd weight (dzeta cut)
-  QCDModelForEMu qcdWeight("HTT-utilities/QCDModelingEMu/data/QCD_weight_emu.root");
-  // qcd weight DZeta cut
-  QCDModelForEMu qcdWeightNoDzeta("HTT-utilities/QCDModelingEMu/data/QCD_weight_emu_nodzeta.root");
-
-  // BTag scale factors
   BTagCalibration calib("csvv2", cmsswBase+"/src/DesyTauAnalyses/NTupleMaker/data/CSVv2_ichep.csv");
-  //BTagCalibrationReader reader_BC(&calib,BTagEntry::OP_MEDIUM,"mujets","central");           // systematics type
-  //BTagCalibrationReader reader_Light(&calib,BTagEntry::OP_MEDIUM,"incl","central");           // systematics type
-  BTagCalibrationReader reader(BTagEntry::OP_MEDIUM,  // operating point
-			       "central");            // systematics type
-  reader.load(calib,               // calibration instance
-	      BTagEntry::FLAV_B,    // btag flavour
-	      "mujets");            // measurement type
-  
-  reader.load(calib,               // calibration instance
-	      BTagEntry::FLAV_C,    // btag flavour
-	      "mujets");             // measurement type
-
-  reader.load(calib,               // calibration instance
-	      BTagEntry::FLAV_UDSG,    // btag flavour
-	      "incl");             // measurement type
+  BTagCalibrationReader reader_BC(BTagEntry::OP_MEDIUM,"central");
+  BTagCalibrationReader reader_Light(BTagEntry::OP_MEDIUM,"central");
+  reader_BC.load(calib,BTagEntry::FLAV_B,"mujets");
+  reader_Light.load(calib,BTagEntry::FLAV_UDSG,"incl");
 
   //  std::cout << "SF_light (eta=0.6,pt=20.1) : " << reader_Light.eval(BTagEntry::FLAV_UDSG, 0.5, 20.1) << std::endl;
   //  std::cout << "SF_light (eta=2.1,pt=20.1) : " << reader_Light.eval(BTagEntry::FLAV_UDSG, 2.1, 20.1) << std::endl;
@@ -299,7 +278,7 @@ int main(int argc, char * argv[]) {
 	
   float MaxBJetPt = 670.;
   float MaxLJetPt = 1000.;
-  float MinLJetPt = 20.;
+  float MinLJetPt = 30.;
   float MinBJetPt = 30.;
 
 
@@ -313,24 +292,18 @@ int main(int argc, char * argv[]) {
 
   SF_muonIdIso->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(MuonIdIsoFile));
 cout<<" Initializing Trigger SF files....."<<endl;
-  ScaleFactor * SF_muon17 = new ScaleFactor();
-  SF_muon17->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(Muon17TriggerFile));
+  ScaleFactor * SF_muon23 = new ScaleFactor();
+  SF_muon23->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(Muon23TriggerFile));
   ScaleFactor * SF_muon8 = new ScaleFactor();
   SF_muon8->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(Muon8TriggerFile));
 	cout<<" Initializing iD SF files....."<<endl;
   ScaleFactor * SF_electronIdIso = new ScaleFactor();
   SF_electronIdIso->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(ElectronIdIsoFile));
 cout<<" Initializing Trigger SF files....."<<endl;
-  ScaleFactor * SF_electron17 = new ScaleFactor();
-  SF_electron17->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(Electron17TriggerFile));
+  ScaleFactor * SF_electron23 = new ScaleFactor();
+  SF_electron23->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(Electron23TriggerFile));
   ScaleFactor * SF_electron12 = new ScaleFactor();
   SF_electron12->init_ScaleFactor(TString(cmsswBase)+"/src/"+TString(Electron12TriggerFile));
-
-
-
-  //////////////////////////////////////
-  //////// Initialized TauFakeRates here
-  //////////////////////////////////////
 
 
   double Weight=0;
@@ -366,19 +339,22 @@ cout<<" Initializing Trigger SF files....."<<endl;
   regionName = invMuStr+invTauStr+invMETStr+"_"+Region.c_str()+"_"+Sign.c_str();
   std::cout <<" The filename will be "<<TStrName <<"  "<<datasetName<<std::endl;  
   // output fileName with histograms
+
 std::string st1,st2;
 bool SUSY = false;
 float SusyMotherMassF;
 float SusyLSPMassF;
-if (string::npos != rootFileName.find("SMS-"))
+
+//SMS-TChiSlepSnu_x0p5_TuneCUETP8M1_13TeV-madgraphMLM-pythia8   SMS-TChiStauStau_x0p5_TuneCUETP8M1_13TeV-madgraphMLM-pythia8  SMS-TStauStau_TuneCUETP8M1_13TeV-madgraphMLM-pythia8
+
+if (string::npos != rootFileName.find("SMS-") || string::npos != rootFileName.find("stau") || string::npos != rootFileName.find("C1"))
 	{
 	//st1 =  rootFileName.substr(4,3);
 	SusyMotherMassF = stof(argv[5]);
-	st1=string(argv[5]);
+	//st1=string(argv[5]);
 	//st2 =  rootFileName.substr(11);
-	st2=string(argv[6]);
+	//st2=string(argv[6]);
 	SusyLSPMassF = stof(argv[6]);
-	cout<<" st1 "<<st1<<"  "<<st2<<" "<<endl;
 	SUSY = true;
 	  std::cout <<" SUSY "<< " SusyMotherMassF= "<<SusyMotherMassF <<" SusyLSPMassF= "<<SusyLSPMassF <<std::endl;  
 	}
@@ -395,18 +371,18 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 */
 
 
-
   TFile * file;
   if (isData) file = new TFile(era+"/"+TStrName+TString("_DataDriven.root"),"update");
-  if (!isData && !SUSY) file = new TFile(era+"/"+TStrName+TString(".root"),"update");
-  if (SUSY)
+  if (!isData) file = new TFile(era+"/"+TStrName+TString(".root"),"update");
+ /* if (SUSY)
 	{  
 	TString TStrNameS(rootFileName+invMuStr+invTauStr+invMETStr+"_"+Region+"_"+Sign+"_"+st1+"_"+st2);
 	file = new TFile(era+"/"+TStrNameS+TString(".root"),"update");
 
-	}
+	}*/
   file->mkdir(Channel.c_str());
   file->cd(Channel.c_str());
+
 
   int nFiles = 0;
   int nEvents = 0;
@@ -432,8 +408,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
   if (argv[4] != NULL  && atoi(argv[4])< nTotalFiles) nTotalFiles=atoi(argv[4]);
   //if (nTotalFiles>50) nTotalFiles=50;
   //nTotalFiles = 10;
-
- for (int iF=0; iF<nTotalFiles; ++iF) {
+ 
+for (int iF=0; iF<nTotalFiles; ++iF) {
 
     std::string filen;
     fileList >> filen;
@@ -444,29 +420,27 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 //if (iF+1 != nTotalFiles) continue;}
     TFile * file_ = TFile::Open(TString(filen));
 
-    TH1D * histoInputEvents = NULL;
+/*    TH1D * histoInputEvents = NULL;
     histoInputEvents = (TH1D*)file_->Get("makeroottree/nEvents");
     if (histoInputEvents==NULL) continue;
     int NE = (int)histoInputEvents->GetEntries();
     for (int iE=0;iE<NE;++iE)
       inputEventsH->Fill(0.);
+
     std::cout << "      number of input events         = " << NE << std::endl;
+*/
 
 
-	bool WithInit = true;
+bool WithInit = true;
+if (SUSY) WithInit=false;
 
-    	TTree * _test = NULL;
-	_test = (TTree*)file_->Get(TString(initNtupleName));
-    	if (_test==NULL) WithInit = false;
-
-
-	if (WithInit) cout << "With initroottree!!!"<<endl;
-	if (!WithInit) cout << "Without initroottree!!!"<<endl;
+if (WithInit) cout << "With initroottree"<<endl;
+if (!WithInit) cout << "Without initroottree"<<endl;
 
 
-  	  TTree * _inittree = NULL;
-	if (!WithInit)  _inittree = (TTree*)file_->Get(TString(ntupleName));
-	if (WithInit)  _inittree = (TTree*)file_->Get(TString(initNtupleName));
+    TTree * _inittree = NULL;
+if (!WithInit)  _inittree = (TTree*)file_->Get(TString(ntupleName));
+if (WithInit)  _inittree = (TTree*)file_->Get(TString(initNtupleName));
 
     if (_inittree==NULL) continue;
     Float_t genweight;
@@ -482,42 +456,45 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       //histWeightsH->Fill(0.,genweight);
     }
 
+
     TTree * _tree = NULL;
     _tree = (TTree*)file_->Get(TString(ntupleName));
+
     if (_tree==NULL) continue;
     Long64_t numberOfEntries = _tree->GetEntries();
     std::cout << "      number of entries in Tree      = " << numberOfEntries << std::endl;
     AC1B analysisTree(_tree);
 
 	if (!isData && !WithInit)
+	//if (!isData)
 		{    
 		for (Long64_t iEntry=0; iEntry<numberOfEntries; ++iEntry) 
 			{
 			analysisTree.GetEntry(iEntry);
-			if (SUSY)
+		/*	if (SUSY)
 			{
 			if (!(SusyMotherMassF < (analysisTree.SusyMotherMass+1) && SusyMotherMassF > (analysisTree.SusyMotherMass - 1) 
 			&& SusyLSPMassF <(analysisTree.SusyLSPMass + 1) && SusyLSPMassF > (analysisTree.SusyLSPMass - 1))) continue;
-			}
+			}*/
 			histWeightsH->Fill(0.,analysisTree.genweight);
 			}
 		}
+  	float genweights=1.;
 
-    float genweights=1;
+	TTree *genweightsTree = (TTree*)file_->Get("initroottree/AC1B");
+	genweightsTree->SetBranchAddress("genweight",&genweights);
+
     if(!isData && WithInit) 
       {
 
-	TTree *genweightsTree = (TTree*)file_->Get("initroottree/AC1B");
-	     
-	genweightsTree->SetBranchAddress("genweight",&genweights);
 	Long64_t numberOfEntriesInit = genweightsTree->GetEntries();
 	for (Long64_t iEntryInit=0; iEntryInit<numberOfEntriesInit; ++iEntryInit) { 
 	  genweightsTree->GetEntry(iEntryInit);
-			if (SUSY)
+	/*		if (SUSY)
 			{
 			if (!(SusyMotherMassF < (analysisTree.SusyMotherMass+1) && SusyMotherMassF > (analysisTree.SusyMotherMass - 1) 
 			&& SusyLSPMassF <(analysisTree.SusyLSPMass + 1) && SusyLSPMassF > (analysisTree.SusyLSPMass - 1))) continue;
-			}
+			}*/
 	  histWeightsH->Fill(0.,genweights);
 	}
     
@@ -529,19 +506,23 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
 
 
+
+
+
+
     for (Long64_t iEntry=0; iEntry<numberOfEntries; ++iEntry) { 
 
-      Float_t weight = 1;
-      Float_t puweight = 1;
-      Float_t topptweight = 1;
+
+      Float_t weight = 1.;
+      Float_t puweight = 1.;
+      Float_t topptweight = 1.;
       analysisTree.GetEntry(iEntry);
-	if (SUSY)////FOR SUSY!!!!!!!!
+/*	if (SUSY)
 		{
 		if (!(SusyMotherMassF < (analysisTree.SusyMotherMass+1) && SusyMotherMassF > (analysisTree.SusyMotherMass - 1) 
 		&& SusyLSPMassF <(analysisTree.SusyLSPMass + 1) && SusyLSPMassF > (analysisTree.SusyLSPMass - 1))) continue;
-		}
+		}*/
       nEvents++;
-
       iCut = 0;
 
       //std::cout << "      number of entries in Tree = " << numberOfEntries <<" starting weight "<<weight<< std::endl;
@@ -559,25 +540,25 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       
       //isData= false;
       bool lumi=false;
+      bool CutBasedTauId = false;
       isLowIsoMu=false;
       isHighIsoMu = false;
       isLowIsoTau=false;
       isHighIsoTau = false;
 
-      Float_t genweights;
+      Float_t genweight;
       float topPt = 0;
       float antitopPt = 0;
       LSF_weight = 1.;
       TFR_weight = 1.;
-      qcdweight = 1.;
-      qcdweightup = 1.;
-      qcdweightdown = 1.;
       top_weight = 1.;
       all_weight = 1.;
       pu_weight = 1.;
       gen_weight = 1.;
       trig_weight = 1.;
-      if(!isData) 
+	  
+
+      if (!isData && ( string::npos != filen.find("TTJets")  || string::npos != filen.find("TTPowHeg") || string::npos != filen.find("TT_TuneCUETP8M1_13TeV-powheg-pythia8")) ) 
 	{
 	  for (unsigned int igen=0; igen<analysisTree.genparticles_count; ++igen) {
 	    // 		cout<< "  info = " <<  int(analysisTree.genparticles_count) <<"  "<<int(analysisTree.genparticles_pdgid[igen])<<endl;
@@ -589,24 +570,34 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	      antitopPt = TMath::Sqrt(analysisTree.genparticles_px[igen]*analysisTree.genparticles_px[igen]+
 				      analysisTree.genparticles_py[igen]*analysisTree.genparticles_py[igen]);
 
-	  }    
-				
+
+	  }
+
+	  if (topPt>0.&&antitopPt>0.) {
+	    topptweight = topPtWeight(topPt,antitopPt);
+	    weight *= topptweight;
+	    top_weight = topptweight;
+	     // cout<<"  "<<topPt<<"  "<<antitopPt<<"  "<<topptweight<<endl;
+	  }
+
+
+      histTopPt->Fill(0.,topptweight);
+
+	}
 	  if (!isData ) {
 	    weight *= analysisTree.genweight;
 	    gen_weight *=analysisTree.genweight;
+	   // std::cout <<"analysisTree.genweight "<< float(analysisTree.genweight) << std::endl;
+	  lumi=true;
 	  }
 					
 				
-	  lumi=true;
-	  //cout<<"  weight from init "<<genweights<< "  "<<analysisTree.genweight<<"  "<<weight<<endl;
-	}
 
 
 
       if (isData)  {
 	XSec = 1.;
 	histRuns->Fill(analysisTree.event_run);
-	///////////////according to dimuons
 	int n=analysisTree.event_run;
 	int lum = analysisTree.event_luminosityblock;
 
@@ -665,28 +656,26 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       if (!lumi) continue;
 
 	std::vector<TString> metFlags; metFlags.clear();
-
      //////////////MET filters flag
-      if (!SUSY){
+      //if (!SUSY && isData){
 
-	/* 
+	 
 	 metFlags.push_back("Flag_HBHENoiseFilter");
 	 metFlags.push_back("Flag_HBHENoiseIsoFilter");
-	 metFlags.push_back("Flag_CSCTightHalo2015Filter");
+	 metFlags.push_back("Flag_EcalDeadCellTriggerPrimitiveFilter");
 	 metFlags.push_back("Flag_goodVertices");
-	 metFlags.push_back("Flag_eeBadScFilter");*/
-	 metFlags.push_back("Flag_METFilters");
-	 //metFlags.push_back("Flag_CSCTightHalo2015Filter");
-	// metFlags.push_back("Flag_EcalDeadCellTriggerPrimitiveFilter");
-	// metFlags.push_back("Flag_HBHENoiseFilter");
-	// metFlags.push_back("Flag_HBHENoiseIsoFilter");
+	 metFlags.push_back("Flag_globalSuperTightHalo2016Filter");
+	// metFlags.push_back("Flag_METFilters");
+	 metFlags.push_back("Flag_eeBadScFilter");
 
-      }
+      //}
+	
+
 
 
 	bool METflag = metFiltersPasses2(analysisTree, metFlags);
-	if (!METflag) continue;
-
+	met_flag = METflag;
+	//if (!METflag && isData) continue;
 
 
       JetsMV.clear();
@@ -695,9 +684,6 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       MuMV.clear();
       LeptMV.clear();
       
-      mu_index=-1;
-      tau_index=-1;
-      el_index=-1;
 
       CFCounter[iCut]+= weight;
       CFCounter_[iCut]+= weight;
@@ -713,37 +699,11 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       METV.SetPy(analysisTree.pfmet_ey);
 
 
-      for (unsigned int ijj = 0; ijj<analysisTree.pfjet_count; ++ijj) {
-	JetsV.SetPxPyPzE(analysisTree.pfjet_px[ijj], analysisTree.pfjet_py[ijj], analysisTree.pfjet_pz[ijj], analysisTree.pfjet_e[ijj]);
-	JetsMV.push_back(JetsV);
-      } 
-
-
-      for (unsigned int imm = 0; imm<analysisTree.muon_count; ++imm) {
-	MuV.SetPtEtaPhiM(analysisTree.muon_pt[imm], analysisTree.muon_eta[imm], analysisTree.muon_phi[imm], muonMass);
-	MuMV.push_back(MuV);
-	//	mu_index=0;
-      }
-
-      for (unsigned int ie = 0; ie<analysisTree.electron_count; ++ie) {
-	ElV.SetPtEtaPhiM(analysisTree.electron_pt[ie], analysisTree.electron_eta[ie], analysisTree.electron_phi[ie], electronMass);
-	ElMV.push_back(ElV);
-	//	el_index=0;
-      }
-
-      for (unsigned int itt = 0; itt<analysisTree.tau_count; ++itt) {
-	TauV.SetPtEtaPhiM(analysisTree.tau_pt[itt], analysisTree.tau_eta[itt], analysisTree.tau_phi[itt], tauMass);
-	TauMV.push_back(TauV);
-	//	tau_index=0;
-      }
-
-
-
       if (!isData) 
 	{
 	  if (applyPUreweighting)	 {
-	    /*puweight = float(PUofficial->get_PUweight(double(analysisTree.numtruepileupinteractions)));*/
-		puweight = float(PUofficial->get_PUweight(double(analysisTree.primvertex_count)));
+	    puweight = float(PUofficial->get_PUweight(double(analysisTree.numtruepileupinteractions)));
+	//	puweight = float(PUofficial->get_PUweight(double(analysisTree.primvertex_count)));
 	    weight *=puweight; 
 	    pu_weight = puweight;
 	  }
@@ -754,13 +714,12 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       CFCounter_[iCut]+= weight;
       iCFCounter[iCut]++;
       iCut++;
-	  bool isSUSY = false;
-      if (!isData )/*|| (   string::npos != filen.find("stau") || string::npos != filen.find("C1") || string::npos != filen.find("SMS")) )*/ isSUSY = true;
+
 
       bool trigAccept = false;
 
       unsigned int nMainTrigger = 0;
-      //bool isMainTrigger = false;
+      bool isMainTrigger = false;
 
 
       unsigned int nLowPtLegElectron = 0;
@@ -777,7 +736,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
       unsigned int nfilters = analysisTree.run_hltfilters->size();
       //      std::cout << "nfiltres = " << nfilters << std::endl;
-      if (!isSUSY){
+      if (isData){
       for (unsigned int i=0; i<nfilters; ++i) {
 	//	std::cout << "HLT Filter : " << i << " = " << analysisTree.run_hltfilters->at(i) << std::endl;
 	TString HLTFilter(analysisTree.run_hltfilters->at(i));
@@ -817,11 +776,10 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
       }
 
-     /* if (!isMainTrigger) {
-	return(-1);
-      }
-*/
-      /////now clear the Mu.El.Jets again to fill them again after cleaning
+
+
+      //
+      //
       MuMV.clear();
       ElMV.clear();
       TauMV.clear();
@@ -832,8 +790,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       for (unsigned int ie = 0; ie<analysisTree.electron_count; ++ie) {
 	if (analysisTree.electron_pt[ie]<ptElectronLowCut) continue;
 	if (fabs(analysisTree.electron_eta[ie])>etaElectronCut) continue;
-	if (fabs(analysisTree.electron_dxy[ie])>dxyElectronCut) continue;
-	if (fabs(analysisTree.electron_dz[ie])>dzElectronCut) continue;
+	//if (fabs(analysisTree.electron_dxy[ie])>dxyElectronCut) continue;
+	//if (fabs(analysisTree.electron_dz[ie])>dzElectronCut) continue;
 	//	bool electronMvaId = electronMvaIdWP80(analysisTree.electron_pt[ie],
 	//					       analysisTree.electron_superclusterEta[ie],
 	//					       analysisTree.electron_mva_id_nontrigPhys14[ie]);
@@ -849,30 +807,33 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       for (unsigned int im = 0; im<analysisTree.muon_count; ++im) {
 	if (analysisTree.muon_pt[im]<ptMuonLowCut) continue;
 	if (fabs(analysisTree.muon_eta[im])>etaMuonCut) continue;
-	if (fabs(analysisTree.muon_dxy[im])>dxyMuonCut) continue;
-	if (fabs(analysisTree.muon_dz[im])>dzMuonCut) continue;
+	//if (fabs(analysisTree.muon_dxy[im])>dxyMuonCut) continue;
+	//if (fabs(analysisTree.muon_dz[im])>dzMuonCut) continue;
 	//if (applyMuonId && !analysisTree.muon_isMedium[im]) continue;
 	if (applyMuonId && !analysisTree.muon_isICHEP[im]) continue;
 	muons.push_back(im);
       }
 
-      //      cout << "  SelEle=" << electrons.size() 
-      //	   << "  SelMu=" << muons.size() << std::endl;
+       //     cout << "  SelEle=" << electrons.size()  << "  SelMu=" << muons.size() << std::endl;
 
       if (electrons.size()==0) continue;
       if (muons.size()==0) continue;
       // selecting muon and electron pair (OS or SS);
 
+      int el_index=-1;
+      int mu_index=-1;
+      int tau_index=-1;
       float isoMuMin = 1e+10;
       float isoEleMin = 1e+10;
-      //      if (muons.size()>1||electrons.size()>1)
+      //      if (muons.size()>1 && electrons.size()>1)
       //      std::cout << "muons = " << muons.size() << "  electrons = " << electrons.size() << std::endl;
-      bool isMuon17matched = false;
+
+      bool isMuon23matched = false;
       bool isMuon8matched  = false;
-      bool isElectron17matched = false;
+      bool isElectron23matched = false;
       bool isElectron12matched = false;
       for (unsigned int im=0; im<muons.size(); ++im) {
-	bool isMu17 = false;
+	bool isMu23 = false;
 	bool isMu8 = false;
 	unsigned int mIndex  = muons.at(im);
 	float neutralHadIsoMu = analysisTree.muon_neutralHadIso[mIndex];
@@ -885,8 +846,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	  chargedHadIsoMu = analysisTree.muon_r04_sumChargedHadronPt[mIndex];
 	  puIsoMu = analysisTree.muon_r04_sumPUPt[mIndex];
 	}
-	float neutralIsoMu = neutralHadIsoMu + photonIsoMu - 0.5*puIsoMu;
-	neutralIsoMu = TMath::Max(float(0),neutralIsoMu); 
+	double neutralIsoMuN = neutralHadIsoMu + photonIsoMu - 0.5*puIsoMu;
+	double neutralIsoMu = max(double(0),neutralIsoMuN); 
 	float absIsoMu = chargedHadIsoMu + neutralIsoMu;
 	float relIsoMu = absIsoMu/analysisTree.muon_pt[mIndex];
 	for (unsigned int iT=0; iT<analysisTree.trigobject_count; ++iT) {
@@ -894,8 +855,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 				analysisTree.trigobject_eta[iT],analysisTree.trigobject_phi[iT]);
 	  if (dRtrig<deltaRTrigMatch) {
 	    if (analysisTree.trigobject_filters[iT][nHighPtLegMuon]&&
-		analysisTree.muon_pt[mIndex]>ptMuonHighCut) { // Mu17 Leg
-	      isMu17 = true;
+		analysisTree.muon_pt[mIndex]>ptMuonHighCut) { // Mu23 Leg
+	      isMu23 = true;
 	    }
 	    if (analysisTree.trigobject_filters[iT][nLowPtLegMuon]&&
 		analysisTree.muon_pt[mIndex]>ptMuonLowCut) { // Mu8 Leg
@@ -903,9 +864,12 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	    }
 	  }
 	}
-	
-	if (applyTriggerMatch && (!isMu17) && (!isMu8) && !isSUSY) continue;
-	  bool isEle17 = false;
+
+	  bool trigMuMatch = (isMu23) || (isMu8);
+	  if (!isData) trigMuMatch = true;
+
+	if (applyTriggerMatch && !trigMuMatch) continue;
+	  bool isEle23 = false;
 	  bool isEle12 = false;
 
 
@@ -924,8 +888,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 				  analysisTree.trigobject_eta[iT],analysisTree.trigobject_phi[iT]);
 	    if (dRtrig<deltaRTrigMatch) {
 	      if (analysisTree.trigobject_filters[iT][nHighPtLegElectron]&&
-		  analysisTree.electron_pt[eIndex]>ptElectronHighCut) { // Ele17 Leg
-		isEle17 = true;
+		  analysisTree.electron_pt[eIndex]>ptElectronHighCut) { // Ele23 Leg
+		isEle23 = true;
 	      }
 	      if (analysisTree.trigobject_filters[iT][nLowPtLegElectron]&&
 		  analysisTree.electron_pt[eIndex]>ptElectronLowCut) { // Ele12 Leg
@@ -935,10 +899,11 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	  }
 
 	  
-	  bool trigMatch = (isMu17&&isEle12) || (isMu8&&isEle17);
-	  //	  std::cout << "Trigger match = " << trigMatch << std::endl;
-
-	  if (applyTriggerMatch && !isSUSY && !trigMatch) continue;
+	  bool trigElMatch = (isMu23&&isEle12) || (isMu8&&isEle23);
+	  //	  std::cout << "Trigger match = " << trigElMatch << std::endl;
+	
+	  if (!isData) trigElMatch = true;
+	  if (applyTriggerMatch && !trigElMatch) continue;
 
 
 	  float neutralHadIsoEle = analysisTree.electron_neutralHadIso[eIndex];
@@ -956,27 +921,28 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	  float absIsoEle =  chargedHadIsoEle + neutralIsoEle;
 	  float relIsoEle = absIsoEle/analysisTree.electron_pt[eIndex];
 
-	  if (int(mIndex)!=(int)mu_index) {
+	  if ((int)mIndex!=(int)mu_index) {
+
 	    if (relIsoMu==isoMuMin) {
 	      if (analysisTree.muon_pt[mIndex]>analysisTree.muon_pt[mu_index]) {
 		isoMuMin  = relIsoMu;
-		mu_index = int(mIndex);
+		mu_index = (int)mIndex;
 		isoEleMin = relIsoEle;
-		el_index = int(eIndex);
-		isMuon17matched = isMu17;
+		el_index = (int)eIndex;
+		isMuon23matched = isMu23;
 		isMuon8matched = isMu8;
-		isElectron17matched = isEle17;
+		isElectron23matched = isEle23;
 		isElectron12matched = isEle12;
 	      }
 	    }
 	    else if (relIsoMu<isoMuMin) {
 	      isoMuMin  = relIsoMu;
-	      mu_index = int(mIndex);
+	      mu_index = (int)mIndex;
 	      isoEleMin = relIsoEle;
-	      el_index = int(eIndex);
-	      isMuon17matched = isMu17;
+	      el_index = (int)eIndex;
+	      isMuon23matched = isMu23;
 	      isMuon8matched = isMu8;
-	      isElectron17matched = isEle17;
+	      isElectron23matched = isEle23;
 	      isElectron12matched = isEle12;
 	    }
 	  }
@@ -984,15 +950,15 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	    if (relIsoEle==isoEleMin) {
 	      if (analysisTree.electron_pt[eIndex]>analysisTree.electron_pt[el_index]) {
 		isoEleMin = relIsoEle;
-		el_index = int(eIndex);
-		isElectron17matched = isEle17;
+		el_index = (int)eIndex;
+		isElectron23matched = isEle23;
 		isElectron12matched = isEle12;
 	      }
 	    }
 	    else if (relIsoEle<isoEleMin) {
 	      isoEleMin = relIsoEle;
-	      el_index = int(eIndex);
-	      isElectron17matched = isEle17;
+	      el_index = (int)eIndex;
+	      isElectron23matched = isEle23;
 	      isElectron12matched = isEle12;
 	    }
 	  }
@@ -1000,7 +966,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	}
       }
 
-      //      cout << "mIndex = " << mu_index << "   eIndex = " << el_index << std::endl;
+        //    cout << "mIndex = " << mu_index << "   eIndex = " << el_index << std::endl;
 
       if ((int)el_index<0) continue;
       if ((int)mu_index<0) continue;
@@ -1025,21 +991,24 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       iCFCounter[iCut]++;
       iCut++;
 
+  bool          dilepton_veto=false;
+  bool          extraelec_veto=false;
+  bool          extramuon_veto=false;
+
+  event_secondLeptonVeto = false;
+  event_thirdLeptonVeto = false;
+
       // looking for extra electron
       bool foundExtraElectron = false;
       for (unsigned int ie = 0; ie<analysisTree.electron_count; ++ie) {
-	if (int(ie)==(int)el_index) continue;
 	if (analysisTree.electron_pt[ie]<ptVetoElectronCut) continue;
 	if (fabs(analysisTree.electron_eta[ie])>etaVetoElectronCut) continue;
 	if (fabs(analysisTree.electron_dxy[ie])>dxyVetoElectronCut) continue;
 	if (fabs(analysisTree.electron_dz[ie])>dzVetoElectronCut) continue;
-	//	bool electronMvaId = electronMvaIdWP90(analysisTree.electron_pt[ie],
-	//					       analysisTree.electron_superclusterEta[ie],
-	//					       analysisTree.electron_mva_id_nontrigPhys14[ie]);
 	bool electronMvaId = analysisTree.electron_mva_wp90_nontrig_Spring15_v1[ie];
 	if (!electronMvaId&&applyVetoElectronId) continue;
-	if (!analysisTree.electron_pass_conversion[ie]&&applyVetoElectronId&&applyVetoElectronId) continue;
-	if (analysisTree.electron_nmissinginnerhits[ie]>1&&applyVetoElectronId&&applyVetoElectronId) continue;
+	if (!analysisTree.electron_pass_conversion[ie]&&applyVetoElectronId) continue;
+	if (analysisTree.electron_nmissinginnerhits[ie]>1&&applyVetoElectronId) continue;
 	float neutralHadIsoEle = analysisTree.electron_neutralHadIso[ie];
 	float photonIsoEle = analysisTree.electron_photonIso[ie];
 	float chargedHadIsoEle = analysisTree.electron_chargedHadIso[ie];
@@ -1050,8 +1019,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	  chargedHadIsoEle = analysisTree.electron_r03_sumChargedHadronPt[ie];
 	  puIsoEle = analysisTree.electron_r03_sumPUPt[ie];
 	}
-	float neutralIsoEle = neutralHadIsoEle + photonIsoEle - 0.5*puIsoEle;
-	neutralIsoEle = TMath::Max(float(0),neutralIsoEle); 
+	double neutralIsoEleN = neutralHadIsoEle + photonIsoEle - 0.5*puIsoEle;
+	double neutralIsoEle = TMath::Max(double(0),neutralIsoEleN); 
 	float absIsoEle =  chargedHadIsoEle + neutralIsoEle;
 	float relIsoEle = absIsoEle/analysisTree.electron_pt[ie];	
 	if (relIsoEle>isoVetoElectronCut) continue;
@@ -1078,23 +1047,22 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	  chargedHadIsoMu = analysisTree.muon_r04_sumChargedHadronPt[im];
 	  puIsoMu = analysisTree.muon_r04_sumPUPt[im];
 	}
-	float neutralIsoMu = neutralHadIsoMu + photonIsoMu - 0.5*puIsoMu;
-	neutralIsoMu = TMath::Max(float(0),neutralIsoMu); 
+	double neutralIsoMuN = neutralHadIsoMu + photonIsoMu - 0.5*puIsoMu;
+	double neutralIsoMu = TMath::Max(double(0),neutralIsoMuN); 
 	float absIsoMu = chargedHadIsoMu + neutralIsoMu;
 	float relIsoMu = absIsoMu/analysisTree.muon_pt[im];
 	if (relIsoMu>isoVetoMuonCut) continue;
 	foundExtraMuon = true;
       }
 
-      bool dilepton_veto = false;
-      bool extraelec_veto = foundExtraElectron;
-      bool extramuon_veto = foundExtraMuon;
 
+      extraelec_veto = foundExtraElectron;
+      extramuon_veto = foundExtraMuon;
 
 
       // applying inclusive selection
 
-   	event_secondLeptonVeto = dilepton_veto;
+   	event_secondLeptonVeto = false;
 
 
       CFCounter[iCut]+= weight;
@@ -1102,11 +1070,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       iCFCounter[iCut]++;
       iCut++;
 
-
-        if(extraelec_veto || extramuon_veto)   event_secondLeptonVeto = true;
-	if (extraelec_veto) continue;
-	if (extramuon_veto) continue;
-
+	
+	if(extraelec_veto || extramuon_veto)   event_thirdLeptonVeto = true;
 
 
       CFCounter[iCut]+= weight;
@@ -1114,7 +1079,6 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       iCFCounter[iCut]++;
       iCut++;
 
-      
 
 
 
@@ -1132,33 +1096,33 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
   //   float trigweight_1=1.;
   //   float trigweight_2=1.;
 
-      float Ele17EffData = (float)SF_electron17->get_EfficiencyData(double(pt_1),double(eta_1));
- /*     float Ele17EffMC   = (float)SF_electron17->get_EfficiencyMC(double(pt_1),double(eta_1));*/
+      float Ele23EffData = (float)SF_electron23->get_EfficiencyData(double(pt_1),double(eta_1));
+ /*     float Ele23EffMC   = (float)SF_electron23->get_EfficiencyMC(double(pt_1),double(eta_1));*/
 
       float Ele12EffData = (float)SF_electron12->get_EfficiencyData(double(pt_1),double(eta_1));
  /*     float Ele12EffMC   = (float)SF_electron12->get_EfficiencyMC(double(pt_1),double(eta_1));*/
 
-      float Mu17EffData = (float)SF_muon17->get_EfficiencyData(double(pt_2),double(eta_2));
-  /*    float Mu17EffMC   = (float)SF_muon17->get_EfficiencyMC(double(pt_2),double(eta_2));*/
+      float Mu23EffData = (float)SF_muon23->get_EfficiencyData(double(pt_2),double(eta_2));
+  /*    float Mu23EffMC   = (float)SF_muon23->get_EfficiencyMC(double(pt_2),double(eta_2));*/
 
       float Mu8EffData = (float)SF_muon8->get_EfficiencyData(double(pt_2),double(eta_2));
   /*    float Mu8EffMC   = (float)SF_muon8->get_EfficiencyMC(double(pt_2),double(eta_2));*/
 
-      float trigWeightData = Mu17EffData*Ele12EffData + Mu8EffData*Ele17EffData - Mu17EffData*Ele17EffData;
-  /*    float trigWeightMC   = Mu17EffMC*Ele12EffMC     + Mu8EffMC*Ele17EffMC     - Mu17EffMC*Ele17EffMC;*/
+      float trigWeightData = Mu23EffData*Ele12EffData + Mu8EffData*Ele23EffData - Mu23EffData*Ele23EffData;
+  /*    float trigWeightMC   = Mu23EffMC*Ele12EffMC     + Mu8EffMC*Ele23EffMC     - Mu23EffMC*Ele23EffMC;*/
 /*
-      if (isMuon17matched && isElectron12matched) {
+      if (isMuon23matched && isElectron12matched) {
 	trigweight_1 = (float)SF_electron12->get_ScaleFactor(double(pt_1),double(eta_1));
-	trigweight_2 = (float)SF_muon17->get_ScaleFactor(double(pt_2),double(eta_2));
+	trigweight_2 = (float)SF_muon23->get_ScaleFactor(double(pt_2),double(eta_2));
       	}
-      else if (isMuon8matched && isElectron17matched) {
-	trigweight_1 = (float)SF_electron17->get_ScaleFactor(double(pt_1),double(eta_1));
+      else if (isMuon8matched && isElectron23matched) {
+	trigweight_1 = (float)SF_electron23->get_ScaleFactor(double(pt_1),double(eta_1));
 	trigweight_2 = (float)SF_muon8->get_ScaleFactor(double(pt_2),double(eta_2));
       	}
 	*/
 	/*if(!isData && trigWeightMC>1e-6){
 	trigweight = trigWeightData / trigWeightMC;*/
-	if ( isSUSY){
+	if (!isData){
 	trigweight = trigWeightData;
 
 	weight *= trigweight;
@@ -1197,22 +1161,6 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       iCut++;
 
 
-      if (!isData && ( string::npos != filen.find("TTJets")  || string::npos != filen.find("TTPowHeg") || string::npos != filen.find("TT_TuneCUETP8M1_13TeV-powheg-pythia8")) ) 
-	{
-
-	  if (topPt>0.&&antitopPt>0.) {
-	    float topptweight = topPtWeight(topPt,antitopPt);
-	    //  cout<<"  "<<topPt<<"  "<<antitopPt<<endl;
-	    weight *= topptweight;
-	    top_weight = topptweight;
-	  }
-	}
-
-
-      CFCounter[iCut]+= weight;
-      CFCounter_[iCut]+= weight;
-      iCFCounter[iCut]++;
-      iCut++;
 
       //////////////////////////////////////////////
       muon_index = (int)mu_index;
@@ -1259,8 +1207,14 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	ta_charge[it]=analysisTree.tau_charge[it];
 	ta_dxy[it]=analysisTree.tau_dxy[it];
 	ta_dz[it]=analysisTree.tau_dz[it];
-      }
+	//
+     	ta_puCorrPtSum[it] = analysisTree.tau_puCorrPtSum[it];
+     	ta_chargedIsoPtSum[it] = analysisTree.tau_chargedIsoPtSum[it];
+     	ta_neutralIsoPtSum[it] = analysisTree.tau_neutralIsoPtSum[it];
 
+
+
+      }
       jet_count=(int)analysisTree.pfjet_count;
       for (unsigned int jj=0;jj<analysisTree.pfjet_count;jj++){
 
@@ -1281,19 +1235,30 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       met_phi = analysisTree.pfmet_phi;
 
       if (!isData) npartons = analysisTree.genparticles_noutgoing;
+
       float dr_tt = deltaR(analysisTree.muon_eta[mu_index],analysisTree.muon_phi[mu_index],
 		    analysisTree.electron_eta[el_index],analysisTree.electron_phi[el_index]);
       qcdweight     = qcdWeightNoDzeta.getWeight(pt_1,pt_2,dr_tt);
       qcdweightup   = qcdWeightNoDzeta.getWeightUp(pt_1,pt_2,dr_tt);
       qcdweightdown = qcdWeightNoDzeta.getWeightDown(pt_1,pt_2,dr_tt);
-
       all_weight = weight;
 
-      //cout<<" weight here ->>>>>>>>>>>>>>>>>>> "<<weight<<"  "<<all_weight<<endl;
 
-      /////////////////////////////////////////////////////////
+//systematics and other 
 
-      ////////jets cleaning 
+     met_ex_JetEnUp = analysisTree.pfmet_ex_JetEnUp;
+     met_ey_JetEnUp = analysisTree.pfmet_ey_JetEnUp;
+
+     met_ex_JetEnDown = analysisTree.pfmet_ex_JetEnDown;
+     met_ey_JetEnDown = analysisTree.pfmet_ey_JetEnDown;
+
+     met_ex_UnclusteredEnUp = analysisTree.pfmet_ex_UnclusteredEnUp;
+     met_ey_UnclusteredEnUp = analysisTree.pfmet_ey_UnclusteredEnUp;
+   
+     met_ex_UnclusteredEnDown = analysisTree.pfmet_ex_UnclusteredEnDown;
+     met_ey_UnclusteredEnDown = analysisTree.pfmet_ey_UnclusteredEnDown;
+
+
       TLorentzVector leptonsV, muonJ, jetsLV;
 
 
@@ -1303,7 +1268,6 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 
 
       JetsMV.clear();
-
 
       float jetEtaCut = 2.4;
       float jetEta = 2.4;
@@ -1327,12 +1291,15 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
       int indexLeadingBJet = -1;
       float ptLeadingBJet = -1;
 
-      int counter_cleaned_jets = 0;
+	int counter_cleaned_jets = 0;
+
       for (unsigned int jet=0; jet<analysisTree.pfjet_count; ++jet) {
 	float absJetEta = fabs(analysisTree.pfjet_eta[jet]);
+
 	if (absJetEta > etaJetCut) continue;
 	if (fabs(analysisTree.pfjet_pt[jet])<ptJetCut) continue;
 
+	float jetPt = analysisTree.pfjet_pt[jet];
 
 
 	bool isPFJetId = false ; 
@@ -1343,45 +1310,46 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	jet_isLoose[jet] = isPFJetId;
 	bool cleanedJet = true;
 	//				cout<<"  jet is Loose "<<isPFJetId<<"  "<<jet_isLoose[jet]<<"  "<<iEntry<<endl;
-
 	double Dr=deltaR(analysisTree.muon_eta[mu_index],analysisTree.muon_phi[mu_index],
 			 analysisTree.pfjet_eta[jet],analysisTree.pfjet_phi[jet]);
 	if (  Dr  < DRmax)  cleanedJet=false;
 
-	double Drr=deltaR(analysisTree.electron_eta[el_index],analysisTree.electron_phi[el_index],
+	double Dre=deltaR(analysisTree.electron_eta[el_index],analysisTree.electron_phi[el_index],
 			  analysisTree.pfjet_eta[jet],analysisTree.pfjet_phi[jet]);
-	if (  Drr  < DRmax)  cleanedJet=false;
+
+	if (  Dre  < DRmax )  cleanedJet=false;
 
 	if (!cleanedJet) continue;
 
 	if (absJetEta<bJetEtaCut) { // jet within b-tagging acceptance
 
 	if (analysisTree.pfjet_btag[jet][0]  > bTag) btagged = true;
+	
 
 
 	  if (!isData) {
 	    int flavor = abs(analysisTree.pfjet_flavour[jet]);
 
 	    double jet_scalefactor = 1;
-	    double JetPtForBTag = ptJetCut;
+	    double JetPtForBTag = jetPt;
 	    double tageff = 1;
 
 	    if (flavor==5) {
 	      if (JetPtForBTag>MaxBJetPt) JetPtForBTag = MaxBJetPt - 0.1;
 	      if (JetPtForBTag<MinBJetPt) JetPtForBTag = MinBJetPt + 0.1;
-	      jet_scalefactor = reader.eval_auto_bounds("central", BTagEntry::FLAV_B, absJetEta, JetPtForBTag);
+	      jet_scalefactor = reader_BC.eval_auto_bounds("central",BTagEntry::FLAV_B, absJetEta, JetPtForBTag);
 	      tageff = tagEff_B->Interpolate(JetPtForBTag,absJetEta);
 	    }
 	    else if (flavor==4) {
 	      if (JetPtForBTag>MaxBJetPt) JetPtForBTag = MaxBJetPt - 0.1;
 	      if (JetPtForBTag<MinBJetPt) JetPtForBTag = MinBJetPt + 0.1;
-	      jet_scalefactor = reader.eval_auto_bounds("central", BTagEntry::FLAV_C, absJetEta, JetPtForBTag);
+	      jet_scalefactor = reader_BC.eval_auto_bounds("central",BTagEntry::FLAV_C, absJetEta, JetPtForBTag);
 	      tageff = tagEff_C->Interpolate(JetPtForBTag,absJetEta);
 	    }
 	    else {
 	      if (JetPtForBTag>MaxLJetPt) JetPtForBTag = MaxLJetPt - 0.1;
 	      if (JetPtForBTag<MinLJetPt) JetPtForBTag = MinLJetPt + 0.1;
-	      jet_scalefactor = reader.eval_auto_bounds("central", BTagEntry::FLAV_UDSG, absJetEta, JetPtForBTag);
+	      jet_scalefactor = reader_Light.eval_auto_bounds("central",BTagEntry::FLAV_UDSG, absJetEta, JetPtForBTag);
 	      tageff = tagEff_Light->Interpolate(JetPtForBTag,absJetEta);
 	    }
 	    
@@ -1405,7 +1373,8 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	      }
 	    }
 	  }
-
+//if (btagged)
+//	cout<<"  what here "<<btagged<<"  "<<cleanedJet<<endl;
 	  if (btagged) {
 	    if (cleanedJet) { 
 	      bjets.push_back(jet);
@@ -1418,10 +1387,11 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	}
 
 	if (!cleanedJet) continue;
-	counter_cleaned_jets++;
+
+	   counter_cleaned_jets++;
 
 	  jets.push_back(jet);
-      	jets_cleaned[counter_cleaned_jets]=jet;
+	  jets_cleaned[counter_cleaned_jets]=jet;
 
 	if (indexLeadingJet>=0) {
 	  if (ptJetCut<ptLeadingJet&&ptJetCut>ptSubLeadingJet) {
@@ -1434,20 +1404,29 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
 	  indexLeadingJet = jet;
 	  ptLeadingJet = ptJetCut;
 	}
-	
-
-	JetsV.SetPxPyPzE(analysisTree.pfjet_px[jet], analysisTree.pfjet_py[jet], analysisTree.pfjet_pz[jet], analysisTree.pfjet_e[jet]);
+		JetsV.SetPxPyPzE(analysisTree.pfjet_px[jet], analysisTree.pfjet_py[jet], analysisTree.pfjet_pz[jet], analysisTree.pfjet_e[jet]);
 	JetsMV.push_back(JetsV);
-      }
+	//jet jetc
+	jet_jecUn[counter_cleaned_jets++] = analysisTree.pfjet_jecUncertainty[jet];
 
+      }
       njets = jets.size();
-	npv = analysisTree.primvertex_count;
       countjets = jets.size();
       jet_count = jets.size();
       //njetspt20 = jetspt20.size();
       nbtag = bjets.size();
+     // cout<<" We have nbtag ================================================= "<<nbtag<<endl;
       //nbtag_nocleaned = bjets_nocleaned.size();
+
+      npv =  analysisTree.primvertex_count;
+      npu = analysisTree.numtruepileupinteractions;
+	
+      SusyMother = SusyMotherMassF;
+      SusyLSP = SusyLSPMassF;
+
       T->Fill();
+
+
 
       continue;
       /////////////////////////////////////////////////
@@ -1515,6 +1494,7 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
   hxsec->Write();
   inputEventsH->Write();
   histWeightsH->Write();
+  histTopPt->Write();
   histRuns->Write();
   CutFlowUnW->Write();
   CutFlow->Write();
@@ -1525,3 +1505,4 @@ if (string::npos != rootFileName.find("SMS-TChiStauStau"))
   delete file;
 
 }
+
