@@ -44,6 +44,9 @@ IS_PFMET_JETEN="false" #for  met_Unclustered
 #IS_PFMET_UP="true" #for met 1 sigma up
 IS_PFMET_UP="false" #for met 1 sigma down
 
+#WJETS_INCLUSIVE="false" # for combinning different WJETS 
+WJETS_INCLUSIVE="true" # for WJETS_INCLUSIVE  
+
 if [[ $2 == "Ttemplate" ]] 
 then
 	channel2="muel"
@@ -148,7 +151,7 @@ sed -i 's/BTAGCUT/'$btag'/g' analyzer*
 sed -i 's/IS_PFMET_USUAL/'$IS_PFMET_USUAL'/g' analyzer.C
 sed -i 's/IS_PFMET_JETEN/'$IS_PFMET_JETEN'/g' analyzer.C
 sed -i 's/IS_PFMET_UP/'$IS_PFMET_UP'/g' analyzer.C
-
+sed -i 's/WJETS_INCLUSIVE/'$WJETS_INCLUSIVE'/g' analyzer.C
 
 rm plots.root
 root -l -q -b runme.C 
@@ -174,6 +177,7 @@ sed -i 's/BTAGCUT/'$btag'/g' analyzer*
 sed -i 's/IS_PFMET_USUAL/'$IS_PFMET_USUAL'/g' analyzer.C
 sed -i 's/IS_PFMET_JETEN/'$IS_PFMET_JETEN'/g' analyzer.C
 sed -i 's/IS_PFMET_UP/'$IS_PFMET_UP'/g' analyzer.C
+sed -i 's/WJETS_INCLUSIVE/'$WJETS_INCLUSIVE'/g' analyzer.C
 #if [[ $channel == "muel" ]] ; then
 
 #sed -i '217 a            bqcd=true;' analyzer.C
@@ -206,6 +210,7 @@ sed -i 's/BTAGCUT/'$btag'/g' analyzer*
 sed -i 's/IS_PFMET_USUAL/'$IS_PFMET_USUAL'/g' analyzer.C
 sed -i 's/IS_PFMET_JETEN/'$IS_PFMET_JETEN'/g' analyzer.C
 sed -i 's/IS_PFMET_UP/'$IS_PFMET_UP'/g' analyzer.C
+sed -i 's/WJETS_INCLUSIVE/'$WJETS_INCLUSIVE'/g' analyzer.C
 rm plots.root
 root -l -q -b runme.C 
 mv plots.root $dir/plots_$channel/${fileB}_D.root
@@ -232,6 +237,7 @@ sed -i 's/BTAGCUT/'$btag'/g' analyzer*
 sed -i 's/IS_PFMET_USUAL/'$IS_PFMET_USUAL'/g' analyzer.C
 sed -i 's/IS_PFMET_JETEN/'$IS_PFMET_JETEN'/g' analyzer.C
 sed -i 's/IS_PFMET_UP/'$IS_PFMET_UP'/g' analyzer.C
+sed -i 's/WJETS_INCLUSIVE/'$WJETS_INCLUSIVE'/g' analyzer.C
 rm plots.root
 root -l -q -b runme.C 
 
