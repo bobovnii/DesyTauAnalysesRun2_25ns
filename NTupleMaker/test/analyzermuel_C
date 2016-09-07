@@ -149,7 +149,7 @@ void analyzer::Loop(){
 		if (string::npos != old.find("W2JetsToLNu")) xsecWjets = 1.221*3144.5;
 		if (string::npos != old.find("W3JetsToLNu")) xsecWjets = 1.221*954.8;
 		if (string::npos != old.find("W4JetsToLNu")) xsecWjets = 1.221*485.6;
-		histW->Scale(0.2/Nevent);
+		//histW->Scale(0.2/Nevent);
 		}
 	float wjets_weights = xsecWjets/Nevent;
 
@@ -252,8 +252,8 @@ if (taus_index>-1)			TauV.SetPtEtaPhiM(ta_pt[taus_index], ta_eta[taus_index], ta
 
 		if (!wjets_inclusive && isWjets)
 			{
-				if (string::npos != old.find("WJetsToLNu") && (npartons==0 || npartons>4)) continue;
-				all_weights *= wjets_weights; 
+				if (string::npos != old.find("WJetsToLNu") && !(npartons==0 || npartons>4)) continue;
+				//all_weights *= wjets_weights; 
 			}
 
 
