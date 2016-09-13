@@ -22,8 +22,6 @@ unsigned int RunMax = 0;
 int tau_index=-1;
 int tau_loose=-1;
 int tau_tight=-1;
-int tau_index1=-1;
-int tau_index2=-1;
 int mu_index=-1;
 int el_index=-1;
 
@@ -42,39 +40,40 @@ int el_index=-1;
    Int_t	   muon_index;
    Int_t	   electron_index;
    Int_t	   taus_index;
-   Int_t	   taus_index2;
    Int_t           mu_count;
    Int_t	   nbtag;
    Int_t	   njets;
    Int_t	   npv;
    Int_t 	   npu;
-   Float_t         mu_px[10];   //[mu_count]
-   Float_t         mu_py[10];   //[mu_count]
-   Float_t         mu_pz[10];   //[mu_count]
-   Float_t         mu_pt[10];   //[mu_count]
-   Float_t         mu_eta[10];   //[mu_count]
-   Float_t         mu_phi[10];   //[mu_count]
-   Float_t         mu_charge[10];   //[mu_count]
-   Float_t         mu_miniISO[10];   //[mu_count]
-   Float_t         mu_dxy[10];   //[mu_count]
-   Float_t         mu_dz[10];   //[mu_count]
-   Float_t         mu_relIso[10];   //[mu_count]
+   Float_t         mu_px[20];   //[mu_count]
+   Float_t         mu_py[20];   //[mu_count]
+   Float_t         mu_pz[20];   //[mu_count]
+   Float_t         mu_pt[20];   //[mu_count]
+   Float_t         mu_eta[20];   //[mu_count]
+   Float_t         mu_phi[20];   //[mu_count]
+   Float_t         mu_charge[20];   //[mu_count]
+   Float_t         mu_miniISO[20];   //[mu_count]
+   Float_t         mu_dxy[20];   //[mu_count]
+   Float_t         mu_dxyerr[20];   //[mu_count]
+   Float_t         mu_dz[20];   //[mu_count]
+   Float_t         mu_dzerr[20];   //[mu_count]
+   Float_t         mu_relIso[20];   //[mu_count]
  
-   Float_t     mu_neutralHadIso[10]; 
-   Float_t     mu_photonIso[10]; 
-   Float_t     mu_chargedHadIso[10]; 
-   Float_t     mu_puIso[10]; 
-   Float_t     mu_neutralIso[10];
-   Float_t     mu_absIsoMu[10]; 
-   Float_t     mu_relIsoMu[10]; 
+   Float_t     mu_neutralHadIso[20]; 
+   Float_t     mu_photonIso[20]; 
+   Float_t     mu_chargedHadIso[20]; 
+   Float_t     mu_puIso[20]; 
+   Float_t     mu_neutralIso[20];
+   Float_t     mu_absIsoMu[20]; 
+   Float_t     mu_relIsoMu[20]; 
 
-   Float_t     el_neutralHadIso[10]; 
-   Float_t     el_photonIso[10]; 
-   Float_t     el_chargedHadIso[10]; 
-   Float_t     el_puIso[10]; 
-   Float_t     el_neutralIso[10];
-   Float_t     el_absIsoEl[10]; 
-   Float_t     el_relIsoEl[10]; 
+   Float_t     el_neutralHadIso[20]; 
+   Float_t     el_photonIso[20]; 
+   Float_t     el_chargedHadIso[20]; 
+   Float_t     el_puIso[20]; 
+   Float_t     el_neutralIso[20];
+   Float_t     el_absIsoEl[20]; 
+   Float_t     el_relIsoEl[20]; 
 
 
 
@@ -98,17 +97,19 @@ int el_index=-1;
    string	   datasetName;
    string	   regionName;
    Int_t           el_count;
-   Float_t         el_px[10];   //[el_count]
-   Float_t         el_py[10];   //[el_count]
-   Float_t         el_pz[10];   //[el_count]
-   Float_t         el_pt[10];   //[el_count]
-   Float_t         el_eta[10];   //[el_count]
-   Float_t         el_phi[10];   //[el_count]
-   Float_t         el_miniISO[10];   //[el_count]
-   Float_t         el_dxy[10];   //[el_count]
-   Float_t         el_dz[10];   //[el_count]
-   Float_t         el_charge[10];   //[el_count]
-   Float_t         el_relIso[10];   //[el_count]
+   Float_t         el_px[20];   //[el_count]
+   Float_t         el_py[20];   //[el_count]
+   Float_t         el_pz[20];   //[el_count]
+   Float_t         el_pt[20];   //[el_count]
+   Float_t         el_eta[20];   //[el_count]
+   Float_t         el_phi[20];   //[el_count]
+   Float_t         el_miniISO[20];   //[el_count]
+   Float_t         el_dxy[20];   //[el_count]
+   Float_t         el_dxyerr[20];   //[el_count]
+   Float_t         el_dz[20];   //[el_count]
+   Float_t         el_dzerr[20];   //[el_count]
+   Float_t         el_charge[20];   //[el_count]
+   Float_t         el_relIso[20];   //[el_count]
 
 
    Int_t           ta_count;
@@ -123,13 +124,7 @@ int el_index=-1;
    Float_t         ta_dz[30];   //[ta_count]
    Float_t         ta_charge[30];   //[ta_count]
    Float_t         ta_IsoFlag;   //[ta_count]
-   Float_t         ta_relIso[10];   //[ta_count]
-   Float_t         ta1_IsoFlagVTight;
-   Float_t         ta2_IsoFlagVTight;
-   Float_t         ta1_IsoFlagLoose;
-   Float_t         ta2_IsoFlagLoose;
-   Float_t         ta1_IsoFlagMedium;
-   Float_t         ta2_IsoFlagMedium;
+   Float_t         ta_relIso[20];   //[ta_count]
    Float_t         ta_puCorrPtSum[30];   //[ta_count]
    Float_t         ta_chargedIsoPtSum[30];   //[ta_count]
    Float_t         ta_neutralIsoPtSum[30];   //[ta_count]
@@ -584,7 +579,6 @@ T  = new TTree("T","T");
   T->Branch("muon_index", &muon_index, "muon_index/I");
   T->Branch("electron_index", &electron_index, "electron_index/I");
   T->Branch("taus_index", &taus_index, "taus_index/I");
-  T->Branch("taus_index2", &taus_index2, "taus_index2/I");
 
   T->Branch("primvert_count", &primvert_count, "primvert_count/I");
   T->Branch("primvert_x", &primvert_x, "primvert_x/F");
@@ -592,33 +586,35 @@ T  = new TTree("T","T");
   T->Branch("primvert_z", &primvert_x, "primvert_z/F");
 
   T->Branch("mu_count", &mu_count, "mu_count/I");
-  T->Branch("mu_px", mu_px, "mu_px[10]/F");
-  T->Branch("mu_py", mu_py, "mu_py[10]/F");
-  T->Branch("mu_pz", mu_pz, "mu_pz[10]/F");
-  T->Branch("mu_pt", mu_pt, "mu_pt[10]/F");
-  T->Branch("mu_eta", mu_eta, "mu_eta[10]/F");
-  T->Branch("mu_phi", mu_phi, "mu_phi[10]/F");
-  T->Branch("mu_charge", mu_charge, "mu_charge[10]/F");
-  T->Branch("mu_miniISO", mu_miniISO, "mu_miniISO[10]/F");
-  T->Branch("mu_dxy", mu_dxy, "mu_dxy[10]/F");
-  T->Branch("mu_dz", mu_dz, "mu_dz[10]/F");
-  T->Branch("mu_relIso", mu_relIso, "mu_relIso[10]/F");
+  T->Branch("mu_px", mu_px, "mu_px[20]/F");
+  T->Branch("mu_py", mu_py, "mu_py[20]/F");
+  T->Branch("mu_pz", mu_pz, "mu_pz[20]/F");
+  T->Branch("mu_pt", mu_pt, "mu_pt[20]/F");
+  T->Branch("mu_eta", mu_eta, "mu_eta[20]/F");
+  T->Branch("mu_phi", mu_phi, "mu_phi[20]/F");
+  T->Branch("mu_charge", mu_charge, "mu_charge[20]/F");
+  T->Branch("mu_miniISO", mu_miniISO, "mu_miniISO[20]/F");
+  T->Branch("mu_dxy", mu_dxy, "mu_dxy[20]/F");
+  T->Branch("mu_dz", mu_dz, "mu_dz[20]/F");
+  T->Branch("mu_dxyerr", mu_dxyerr, "mu_dxyerr[20]/F");
+  T->Branch("mu_dzerr", mu_dzerr, "mu_dzerr[20]/F");
+  T->Branch("mu_relIso", mu_relIso, "mu_relIso[20]/F");
  
-  T->Branch("mu_neutralHadIso", mu_neutralHadIso, "mu_neutralHadIso[10]/F");
-  T->Branch("mu_photonIso", mu_photonIso, "mu_photonIso[10]/F");
-  T->Branch("mu_chargedHadIso", mu_chargedHadIso, "mu_chargedHadIso[10]/F");
-  T->Branch("mu_puIso", mu_puIso, "mu_puIso[10]/F");
-  T->Branch("mu_neutralIso", mu_neutralIso, "mu_neutralIso[10]/F");
-  T->Branch("mu_absIsoMu", mu_absIsoMu, "mu_absIsoMu[10]/F");
-  T->Branch("mu_relIsoMu", mu_relIsoMu, "mu_relIsoMu[10]/F");
+  T->Branch("mu_neutralHadIso", mu_neutralHadIso, "mu_neutralHadIso[20]/F");
+  T->Branch("mu_photonIso", mu_photonIso, "mu_photonIso[20]/F");
+  T->Branch("mu_chargedHadIso", mu_chargedHadIso, "mu_chargedHadIso[20]/F");
+  T->Branch("mu_puIso", mu_puIso, "mu_puIso[20]/F");
+  T->Branch("mu_neutralIso", mu_neutralIso, "mu_neutralIso[20]/F");
+  T->Branch("mu_absIsoMu", mu_absIsoMu, "mu_absIsoMu[20]/F");
+  T->Branch("mu_relIsoMu", mu_relIsoMu, "mu_relIsoMu[20]/F");
 
-  T->Branch("el_neutralHadIso", el_neutralHadIso, "el_neutralHadIso[10]/F");
-  T->Branch("el_photonIso", el_photonIso, "el_photonIso[10]/F");
-  T->Branch("el_chargedHadIso", el_chargedHadIso, "el_chargedHadIso[10]/F");
-  T->Branch("el_puIso", el_puIso, "el_puIso[10]/F");
-  T->Branch("el_neutralIso", el_neutralIso, "el_neutralIso[10]/F");
-  T->Branch("el_absIsoEl", el_absIsoEl, "el_absIsoEl[10]/F");
-  T->Branch("el_relIsoEl", el_relIsoEl, "el_relIsoEl[10]/F");
+  T->Branch("el_neutralHadIso", el_neutralHadIso, "el_neutralHadIso[20]/F");
+  T->Branch("el_photonIso", el_photonIso, "el_photonIso[20]/F");
+  T->Branch("el_chargedHadIso", el_chargedHadIso, "el_chargedHadIso[20]/F");
+  T->Branch("el_puIso", el_puIso, "el_puIso[20]/F");
+  T->Branch("el_neutralIso", el_neutralIso, "el_neutralIso[20]/F");
+  T->Branch("el_absIsoEl", el_absIsoEl, "el_absIsoEl[20]/F");
+  T->Branch("el_relIsoEl", el_relIsoEl, "el_relIsoEl[20]/F");
 
   T->Branch("jet_count", &jet_count, "jet_count/I");
   T->Branch("njets", &njets, "njets/I");
@@ -641,38 +637,34 @@ T  = new TTree("T","T");
 
 
   T->Branch("el_count", &el_count, "el_count/I");
-  T->Branch("el_px", el_px, "el_px[10]/F");
-  T->Branch("el_py", el_py, "el_py[10]/F");
-  T->Branch("el_pz", el_pz, "el_pz[10]/F");
-  T->Branch("el_pt", el_pt, "el_pt[10]/F");
-  T->Branch("el_eta", el_eta, "el_eta[10]/F");
-  T->Branch("el_phi", el_phi, "el_phi[10]/F");
-  T->Branch("el_miniISO", el_miniISO, "el_miniISO[10]/F");
-  T->Branch("el_dxy", el_dxy, "el_dxy[10]/F");
-  T->Branch("el_dz", el_dz, "el_dz[10]/F");
-  T->Branch("el_charge", el_charge, "el_charge[10]/F");
-  T->Branch("el_relIso", el_relIso, "el_relIso[10]/F");
+  T->Branch("el_px", el_px, "el_px[20]/F");
+  T->Branch("el_py", el_py, "el_py[20]/F");
+  T->Branch("el_pz", el_pz, "el_pz[20]/F");
+  T->Branch("el_pt", el_pt, "el_pt[20]/F");
+  T->Branch("el_eta", el_eta, "el_eta[20]/F");
+  T->Branch("el_phi", el_phi, "el_phi[20]/F");
+  T->Branch("el_miniISO", el_miniISO, "el_miniISO[20]/F");
+  T->Branch("el_dxy", el_dxy, "el_dxy[20]/F");
+  T->Branch("el_dz", el_dz, "el_dz[20]/F");
+  T->Branch("el_dxyerr", el_dxyerr, "el_dxyerr[20]/F");
+  T->Branch("el_dzerr", el_dzerr, "el_dzerr[20]/F");
+  T->Branch("el_charge", el_charge, "el_charge[20]/F");
+  T->Branch("el_relIso", el_relIso, "el_relIso[20]/F");
 
 
   T->Branch("ta_count", &ta_count, "ta_count/I");
-  T->Branch("ta_px", ta_px, "ta_px[10]/F");
-  T->Branch("ta_py", ta_py, "ta_py[10]/F");
-  T->Branch("ta_pz", ta_pz, "ta_pz[10]/F");
-  T->Branch("ta_mass", ta_mass, "ta_mass[10]/F");
-  T->Branch("ta_eta", ta_eta, "ta_eta[10]/F");
-  T->Branch("ta_phi", ta_phi, "ta_phi[10]/F");
-  T->Branch("ta_pt", ta_pt, "ta_pt[10]/F");
-  T->Branch("ta_dxy", ta_dxy, "ta_dxy[10]/F");
-  T->Branch("ta_dz", ta_dz, "ta_dz[10]/F");
-  T->Branch("ta_charge", ta_charge, "ta_charge[10]/F");
-  T->Branch("ta_relIso", ta_relIso, "ta_relIso[10]/F");
+  T->Branch("ta_px", ta_px, "ta_px[20]/F");
+  T->Branch("ta_py", ta_py, "ta_py[20]/F");
+  T->Branch("ta_pz", ta_pz, "ta_pz[20]/F");
+  T->Branch("ta_mass", ta_mass, "ta_mass[20]/F");
+  T->Branch("ta_eta", ta_eta, "ta_eta[20]/F");
+  T->Branch("ta_phi", ta_phi, "ta_phi[20]/F");
+  T->Branch("ta_pt", ta_pt, "ta_pt[20]/F");
+  T->Branch("ta_dxy", ta_dxy, "ta_dxy[20]/F");
+  T->Branch("ta_dz", ta_dz, "ta_dz[20]/F");
+  T->Branch("ta_charge", ta_charge, "ta_charge[20]/F");
+  T->Branch("ta_relIso", ta_relIso, "ta_relIso[20]/F");
   T->Branch("ta_IsoFlag", &ta_IsoFlag, "ta_IsoFlag/F");
-  T->Branch("ta1_IsoFlagVTight", &ta1_IsoFlagVTight, "ta1_IsoFlagVTight/F");
-  T->Branch("ta2_IsoFlagVTight", &ta2_IsoFlagVTight, "ta2_IsoFlagVTight/F");
-  T->Branch("ta1_IsoFlagLoose", &ta1_IsoFlagLoose, "ta1_IsoFlagLoose/F");
-  T->Branch("ta2_IsoFlagLoose", &ta2_IsoFlagLoose, "ta2_IsoFlagLoose/F");
-  T->Branch("ta1_IsoFlagMedium", &ta1_IsoFlagMedium, "ta1_IsoFlagMedium/F");
-  T->Branch("ta2_IsoFlagMedium", &ta2_IsoFlagMedium, "ta2_IsoFlagMedium/F");
   T->Branch("ta_chargedIsoPtSum", &ta_chargedIsoPtSum, "ta_chargedIsoPtSum/F");
   T->Branch("ta_neutralIsoPtSum", &ta_neutralIsoPtSum, "ta_neutralIsoPtSum/F");
   T->Branch("ta_puCorrPtSum", &ta_puCorrPtSum, "ta_puCorrPtSum/F");
